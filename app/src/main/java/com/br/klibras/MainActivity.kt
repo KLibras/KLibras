@@ -28,6 +28,7 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 class MainActivity : ComponentActivity(), HandLandmarkerHelper.LandmarkerListener {
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
@@ -37,6 +38,14 @@ class MainActivity : ComponentActivity(), HandLandmarkerHelper.LandmarkerListene
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val model = SignLanguageModel(assets)
+        val success = model.testRun()
+        if (success) {
+            Toast.makeText(this, "Modelo carregado e funcionando ✅", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Falha ao rodar o modelo ❌", Toast.LENGTH_LONG).show()
+        }
 
         // Inicia o helper
         handLandmarkerHelper = HandLandmarkerHelper(
