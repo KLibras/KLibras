@@ -42,9 +42,9 @@ class MainActivity : ComponentActivity(), HandLandmarkerHelper.LandmarkerListene
         val model = SignLanguageModel(assets)
         val success = model.testRun()
         if (success) {
-            Toast.makeText(this, "Modelo carregado e funcionando ✅", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Modelo carregado e funcionando", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(this, "Falha ao rodar o modelo ❌", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Falha ao rodar o modelo", Toast.LENGTH_LONG).show()
         }
 
         // Inicia o helper
