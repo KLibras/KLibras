@@ -73,6 +73,10 @@ dependencies {
     // Media-pipe Task
     implementation(libs.tasks.vision)
 
+    // TensorFLow
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+
     // Camera X
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
