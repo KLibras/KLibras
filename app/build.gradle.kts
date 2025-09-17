@@ -2,10 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
-    // Plugin pra instalar a task
     id("de.undercouch.download") version "5.6.0"
-
 }
 
 android {
@@ -18,19 +15,44 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters.add("armeabi-v7a")
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a")
+            isUniversalApk = false
+        }
+    }
+
+    /*
+        Chama o script pra instalar o arquivo da task no celular
+
+        extra["ASSET_DIR"] = "$projectDir/src/main/assets"
+        apply(from = "download_tasks.gradle")
+    */
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -43,16 +65,7 @@ android {
     }
 }
 
-/*
-
-Chama o script pra instalar o arquivo da task no celular
-
-extra["ASSET_DIR"] = "$projectDir/src/main/assets"
-apply(from = "download_tasks.gradle")
-*/
-
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,7 +82,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-
     // Media-pipe Task
     implementation(libs.tasks.vision)
 
@@ -85,6 +97,4 @@ dependencies {
 
     // Compose
     implementation(libs.androidx.activity.compose.v180)
-
-
 }
