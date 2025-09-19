@@ -1,0 +1,33 @@
+The application captures video from the front-facing camera, analyzes the frames to detect human pose and hand movements, and feeds this data into a machine learning model to classify a specific sign language gesture (in this case, seeming to distinguish "Obrigado" from another class).
+
+Key Technologies & Components
+
+    MediaPipe: The core of the feature extraction process. It uses two specific MediaPipe Tasks:
+
+        HandLandmarker: Detects the 21 keypoints on each hand in real-time.
+
+        PoseLandmarker: Detects 33 keypoints across the human body.
+
+    TensorFlow Lite: Runs a custom, on-device machine learning model (SlModel.tflite). This model takes a sequence of keypoints as input and outputs a prediction.
+
+    CameraX: An Android Jetpack library used to manage the camera, capture image frames, and provide them for analysis in an efficient way.
+
+    Custom Android UI (OverlayView.kt): A custom View is used to draw the detected hand landmarks and their connections directly on top of the camera preview, providing visual feedback to the user.
+
+Workflow
+
+    Camera Initialization: The app requests camera permission and uses CameraX to set up a continuous stream of image frames from the front camera.
+
+    Real-time Landmark Detection: Each frame from the camera is passed to both the MediaPipe HandLandmarker and PoseLandmarker running in LIVE_STREAM mode. These tasks asynchronously detect the coordinates (x,y,z) of all relevant body and hand keypoints.
+
+    Gesture Recording Trigger: The system continuously checks for the presence of hands in the frame. When a hand is first detected, it begins a 5-second recording session.
+
+    Data Collection & Preprocessing: During the recording, the application collects the keypoints from both hands and the body for each frame, creating a time-series sequence. After recording, this sequence is processed:
+
+        It's normalized to a fixed number of frames (maxFrames = 30) by either padding or sampling the collected data.
+
+        The data is then flattened into a ByteBuffer to serve as input for the TensorFlow Lite model.
+
+    Inference: The prepared ByteBuffer is fed into the SignLanguageModel.tflite interpreter. The model processes the sequence of movements and outputs a prediction (a FloatArray of probabilities for two classes).
+
+    Display Results: The app interprets the model's output to determine if the gesture for "Obrigado" was performed and displays the result to the user via a simple Toast message. The landmarks are simultaneously rendered by the OverlayView.

@@ -13,17 +13,11 @@ import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
 class HandLandmarkerHelper(
-    var minHandDetectionConfidence: Float = DEFAULT_HAND_DETECTION_CONFIDENCE,
-    var minHandTrackingConfidence: Float = DEFAULT_HAND_TRACKING_CONFIDENCE,
-    var minHandPresenceConfidence: Float = DEFAULT_HAND_PRESENCE_CONFIDENCE,
-    var maxNumHands: Int = DEFAULT_NUM_HANDS,
-    var currentDelegate: Int = DELEGATE_CPU,
-    var runningMode: RunningMode = RunningMode.LIVE_STREAM,
     val context: Context,
-
-
-    // Necessário pra fazer o uso do LIVE_STREAM
-    val handLandmarkerHelperListener: LandmarkerListener? = null
+    // The listener is no longer nullable as it's required for LIVE_STREAM mode
+    val landmarkerListener: LandmarkerListener,
+    // Set default delegate to GPU for better performance
+    private var currentDelegate: Int = DELEGATE_GPU
 ) {
 
     private var handLandmarker: HandLandmarker? = null
@@ -32,142 +26,106 @@ class HandLandmarkerHelper(
         setupHandLandmarker()
     }
 
-    // Fecha o helper pra poupar recursos
-    fun isClosed(): Boolean {
-        return handLandmarker == null
-    }
-
-
-    // Limpa o helper pra poupar recursos
     fun clearHandLandmarker() {
         handLandmarker?.close()
         handLandmarker = null
     }
 
-
-    // Builder
     fun setupHandLandmarker() {
-        // Setta as opções em geral
-        val baseOptionsBuilder = BaseOptions.builder()
-
-        // Poder "escolher" o que vai usar gpu ou cpu
-        when (currentDelegate) {
-            DELEGATE_CPU -> {
-                baseOptionsBuilder.setDelegate(Delegate.CPU)
-            }
-            DELEGATE_GPU -> {
-                baseOptionsBuilder.setDelegate(Delegate.GPU)
-            }
-        }
-
-        baseOptionsBuilder.setModelAssetPath(MP_HAND_LANDMARKER_TASK)
-
-        // Garante que o modo ta em LIVE_STREAM
-        if (runningMode == RunningMode.LIVE_STREAM && handLandmarkerHelperListener == null) {
-            throw IllegalStateException(
-                "Precisa de um listener para rodar em modo LIVE_STREAM"
-            )
-        }
-
         try {
-            val baseOptions = baseOptionsBuilder.build()
+            val baseOptionsBuilder = BaseOptions.builder().setModelAssetPath(MP_HAND_LANDMARKER_TASK)
 
-            val optionsBuilder = HandLandmarker.HandLandmarkerOptions.builder()
-                .setBaseOptions(baseOptions)
-                .setRunningMode(runningMode)
-                .setNumHands(maxNumHands)
-                .setMinHandDetectionConfidence(minHandDetectionConfidence)
-                .setMinTrackingConfidence(minHandTrackingConfidence)
-                .setMinHandPresenceConfidence(minHandPresenceConfidence)
-
-
-            if (runningMode == RunningMode.LIVE_STREAM) {
-                optionsBuilder
-                    .setResultListener(this::returnLivestreamResult)
-                    .setErrorListener(this::returnLivestreamError)
+            when (currentDelegate) {
+                DELEGATE_CPU -> {
+                    baseOptionsBuilder.setDelegate(Delegate.CPU)
+                    Log.d(TAG, "CPU delegate selected.")
+                }
+                DELEGATE_GPU -> {
+                    baseOptionsBuilder.setDelegate(Delegate.GPU)
+                    Log.d(TAG, "GPU delegate selected.")
+                }
             }
 
-            val options = optionsBuilder.build()
+            val baseOptions = baseOptionsBuilder.build()
+            val options = HandLandmarker.HandLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setRunningMode(RunningMode.LIVE_STREAM)
+                .setNumHands(DEFAULT_NUM_HANDS)
+                .setMinHandDetectionConfidence(DEFAULT_HAND_DETECTION_CONFIDENCE)
+                .setMinTrackingConfidence(DEFAULT_HAND_TRACKING_CONFIDENCE)
+                .setMinHandPresenceConfidence(DEFAULT_HAND_PRESENCE_CONFIDENCE)
+                .setResultListener(this::returnLivestreamResult)
+                .setErrorListener(this::returnLivestreamError)
+                .build()
             handLandmarker = HandLandmarker.createFromOptions(context, options)
-
         } catch (e: IllegalStateException) {
-            handLandmarkerHelperListener?.onError(
-                "Landmarker falhou em iniciar",
+            landmarkerListener.onError(
+                "Hand Landmarker failed to initialize. See error log.",
                 OTHER_ERROR
             )
-            Log.e(TAG, "MediaPipe falhou em inicar: ${e.message}")
+            Log.e(TAG, "MediaPipe failed to initialize the task with error: ${e.message}")
         } catch (e: RuntimeException) {
-            // Vai chamar isso aqui se a GPU não conseguir assumir
-            handLandmarkerHelperListener?.onError(
-                "Landmarker falhou em iniciar",
+            // This happens if the GPU delegate is not supported on the device
+            landmarkerListener.onError(
+                "Hand Landmarker failed to initialize with GPU. Falling back to CPU.",
                 GPU_ERROR
             )
-            Log.e(TAG, "MediaPipe failed to load the task with error: ${e.message}")
+            Log.e(TAG, "GPU delegate failed: ${e.message}")
+            // Fallback to CPU
+            currentDelegate = DELEGATE_CPU
+            setupHandLandmarker() // Retry with CPU
         }
     }
 
-    // Processa os frames 1 por 1
-    fun detectLiveStream(bitmap: Bitmap, isFrontCamera: Boolean) {
-        if (runningMode != RunningMode.LIVE_STREAM) {
-            throw IllegalArgumentException("This function is only for LIVE_STREAM mode.")
-        }
-        if (isClosed()) {
-            return
-        }
+    fun detectLiveStream(bitmap: Bitmap) {
+        if (handLandmarker == null) return
 
         val frameTime = SystemClock.uptimeMillis()
         val mpImage = BitmapImageBuilder(bitmap).build()
 
+        // This is an asynchronous call, the result will be returned in the listener
         handLandmarker?.detectAsync(mpImage, frameTime)
     }
 
-    // Passa o resultado pro UI
     private fun returnLivestreamResult(result: HandLandmarkerResult, input: MPImage) {
         val finishTime = SystemClock.uptimeMillis()
         val inferenceTime = finishTime - result.timestampMs()
-
-        handLandmarkerHelperListener?.onResults(
+        landmarkerListener.onResults(
             ResultBundle(
-                listOf(result),
-                inferenceTime,
-                input.height,
-                input.width
+                results = listOf(result),
+                inferenceTime = inferenceTime
             )
         )
     }
 
-
     private fun returnLivestreamError(error: RuntimeException) {
-        handLandmarkerHelperListener?.onError(
+        landmarkerListener.onError(
             error.message ?: "An unknown error has occurred",
             OTHER_ERROR
         )
     }
 
-
-    companion object {
-        const val TAG = "HandLandmarkerHelper"
-        private const val MP_HAND_LANDMARKER_TASK = "hand_landmarker.task" // Seleciona a task do /assets
-
-        const val DELEGATE_CPU = 0
-        const val DELEGATE_GPU = 1 // Define a GPU como primera escolha
-        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F // Esse e os dois de baixo define a confiança do landmarker em achar as mãos, 0.5 ta bom pra testar mas idealmente é 0.7> em produção
-        const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
-        const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
-        const val DEFAULT_NUM_HANDS = 2 // Define o número de mãos
-        const val OTHER_ERROR = 0
-        const val GPU_ERROR = 1
+    interface LandmarkerListener {
+        fun onError(error: String, errorCode: Int = OTHER_ERROR)
+        fun onResults(resultBundle: ResultBundle)
     }
 
     data class ResultBundle(
         val results: List<HandLandmarkerResult>,
-        val inferenceTime: Long,
-        val inputImageHeight: Int,
-        val inputImageWidth: Int,
+        val inferenceTime: Long
     )
 
-    interface LandmarkerListener {
-        fun onError(error: String, errorCode: Int = OTHER_ERROR)
-        fun onResults(resultBundle: ResultBundle)
+    companion object {
+        const val TAG = "HandLandmarkerHelper"
+        private const val MP_HAND_LANDMARKER_TASK = "hand_landmarker.task"
+
+        const val DELEGATE_CPU = 0
+        const val DELEGATE_GPU = 1
+        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
+        const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
+        const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
+        const val DEFAULT_NUM_HANDS = 2
+        const val OTHER_ERROR = 0
+        const val GPU_ERROR = 1
     }
 }
