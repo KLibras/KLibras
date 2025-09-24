@@ -13,7 +13,7 @@ class SignLanguageModel(assetManager: AssetManager) {
 
     init {
         try {
-            interpreter = Interpreter(loadModelFile(assetManager, "SlModel.tflite"))
+            interpreter = Interpreter(loadModelFile(assetManager, "model_no_hollistic.tflite"))
             // Log the model's expected input details to help debug
             val inputTensor = interpreter?.getInputTensor(0)
             val inputShape = inputTensor?.shape()?.joinToString()
