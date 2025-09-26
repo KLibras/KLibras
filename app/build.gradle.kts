@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -82,13 +83,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Media-pipe Task
-    implementation(libs.tasks.vision)
-
-    // TensorFLow
-    implementation(libs.tensorflow.lite.support)
-    implementation(libs.tensorflow.lite.metadata)
-    implementation(libs.tensorflow.lite.select.tf.ops)
 
     // Camera X
     implementation(libs.androidx.camera.core)
@@ -98,7 +92,15 @@ dependencies {
     implementation(libs.androidx.material3)
 
 
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+
     // Compose
     implementation(libs.androidx.activity.compose.v180)
+
+    // Coroutines for asynchronous tasks
+    implementation(libs.kotlinx.coroutines.android)
 }
 

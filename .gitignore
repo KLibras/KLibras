@@ -1,6 +1,7 @@
 *.iml
 *.tflite
 .gradle
+*.h5
 /local.properties
 /.idea/caches
 /.idea/libraries
