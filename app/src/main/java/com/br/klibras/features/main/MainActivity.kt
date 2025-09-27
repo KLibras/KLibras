@@ -1,4 +1,4 @@
-package com.br.klibras
+package com.br.klibras.features.main
 
 import android.Manifest
 import android.content.ContentValues
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -120,10 +121,12 @@ class MainActivity : ComponentActivity() {
                         message = state.result,
                         onButtonClick = { viewModel.resetToReadyState() }
                     )
+
                     is UiState.Error -> ResultScreen(
                         message = state.message,
                         onButtonClick = { viewModel.resetToReadyState() }
                     )
+
                     else -> Unit
                 }
             } else {
@@ -135,11 +138,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun CameraScreen(message: String) {
         val context = LocalContext.current
-        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+        val lifecycleOwner = LocalLifecycleOwner.current
         val cameraController = remember {
             LifecycleCameraController(context).apply {
-                // *** THIS IS THE FIX ***
-                // Explicitly enable video capture alongside image capture.
                 setEnabledUseCases(
                     CameraController.IMAGE_CAPTURE or CameraController.VIDEO_CAPTURE
                 )
@@ -165,32 +166,24 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.RECORD_AUDIO
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
                 return
             }
             recording = cameraController.startRecording(
                 mediaStoreOutput,
-                AudioConfig.create(true), // Enable audio recording
+                AudioConfig.create(true),
                 ContextCompat.getMainExecutor(context),
             ) { event ->
                 if (event is VideoRecordEvent.Finalize) {
                     if (event.hasError()) {
                         Log.e("Camera", "Video capture error: ${event.error}")
-                        viewModel.resetToReadyState() // Reset UI on error
+                        viewModel.resetToReadyState()
                     } else {
                         viewModel.uploadVideoForAnalysis(event.outputResults.outputUri)
                     }
-                    recording = null // Reset recording state
+                    recording = null
                 }
             }
 
-            // Stop recording after 3 seconds
             MainScope().launch {
                 delay(3000)
                 recording?.stop()
@@ -227,7 +220,7 @@ class MainActivity : ComponentActivity() {
                 )
                 Button(
                     onClick = { if (recording == null) startRecording() },
-                    enabled = recording == null // Disable button while recording
+                    enabled = recording == null
                 ) {
                     Text(text = "Record for 3s", fontSize = 18.sp)
                 }
@@ -240,7 +233,12 @@ class MainActivity : ComponentActivity() {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(color = Color.White)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text, color = Color.White, fontSize = 18.sp, textAlign = TextAlign.Center)
+            Text(
+                text,
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 

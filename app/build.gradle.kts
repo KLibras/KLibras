@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("de.undercouch.download") version "5.6.0"
 }
 
 android {
@@ -26,6 +25,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false
@@ -41,14 +41,6 @@ android {
             isUniversalApk = false
         }
     }
-
-    /*
-        Chama o script pra instalar o arquivo da task no celular
-
-        extra["ASSET_DIR"] = "$projectDir/src/main/assets"
-        apply(from = "download_tasks.gradle")
-    */
-
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -66,6 +58,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -83,24 +76,19 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-
-    // Camera X
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation(libs.androidx.material3)
 
-
-    //Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
 
-    // Compose
     implementation(libs.androidx.activity.compose.v180)
 
-    // Coroutines for asynchronous tasks
     implementation(libs.kotlinx.coroutines.android)
-}
 
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+}

@@ -1,4 +1,4 @@
-package com.br.klibras.ui.theme
+package com.br.klibras.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

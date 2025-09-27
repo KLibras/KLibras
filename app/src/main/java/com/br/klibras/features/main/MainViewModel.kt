@@ -1,11 +1,11 @@
-package com.br.klibras
+package com.br.klibras.features.main
 
 import android.app.Application
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.br.klibras.service.ApiService
+import com.br.klibras.core.service.api.ApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 
-// 1. A new, simpler UI state definition
 sealed class UiState {
     data class Ready(val message: String = "Tap the button to record a 3-second video.") : UiState()
     object Recording : UiState()
@@ -31,10 +30,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow<UiState>(UiState.Ready())
     val uiState: StateFlow<UiState> = _uiState
 
-    // 2. Setup Retrofit for networking
     private val apiService: ApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://192.168.15.8:8000")// IMPORTANT: Use 10.0.2.2 for Android Emulator to connect to localhost
+            .baseUrl("http://192.168.15.8:8000") // tem que mudar isso aqui também
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiService::class.java)
@@ -49,7 +47,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = UiState.Uploading()
             try {
-                // 3. Prepare file for multipart upload
                 val context = getApplication<Application>()
                 val file = File(context.cacheDir, "upload.mp4")
                 context.contentResolver.openInputStream(videoUri)?.use { input ->
@@ -64,12 +61,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     file.asRequestBody("video/mp4".toMediaTypeOrNull())
                 )
 
-                // The action you expect the model to find
                 val expectedActionPart = MultipartBody.Part.createFormData(
                     "expected_action", "obrigado"
                 )
 
-                // 4. Make the API call
                 val response = apiService.checkAction(expectedActionPart, videoPart)
 
                 if (response.isSuccessful && response.body() != null) {
@@ -92,7 +87,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Helper function to reset the UI state
     fun resetToReadyState() {
         _uiState.value = UiState.Ready()
     }

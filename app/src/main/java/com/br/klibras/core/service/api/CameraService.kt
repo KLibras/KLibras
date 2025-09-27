@@ -1,4 +1,4 @@
-package com.br.klibras.service
+package com.br.klibras.core.service.api
 
 import okhttp3.MultipartBody
 import retrofit2.Response
