@@ -48,7 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
+import com.br.klibras.core.ui.theme.KLibrasTheme
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,7 +65,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
         setContent {
-            SignLanguageApp()
+            KLibrasTheme {
+                SignLanguageApp(lifecycleOwner = this)
+            }
         }
     }
 
@@ -74,7 +77,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun SignLanguageApp() {
+    fun SignLanguageApp(lifecycleOwner: LifecycleOwner) {
         val uiState by viewModel.uiState.collectAsState()
         val context = LocalContext.current
         var hasCameraPermission by remember {
@@ -115,7 +118,7 @@ class MainActivity : ComponentActivity() {
         ) {
             if (hasCameraPermission) {
                 when (val state = uiState) {
-                    is UiState.Ready -> CameraScreen(message = state.message)
+                    is UiState.Ready -> CameraScreen(message = state.message, lifecycleOwner = lifecycleOwner)
                     is UiState.Uploading -> CenteredMessage(text = state.message)
                     is UiState.Success -> ResultScreen(
                         message = state.result,
@@ -136,9 +139,8 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun CameraScreen(message: String) {
+    fun CameraScreen(message: String, lifecycleOwner: LifecycleOwner) {
         val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
         val cameraController = remember {
             LifecycleCameraController(context).apply {
                 setEnabledUseCases(
@@ -197,6 +199,8 @@ class MainActivity : ComponentActivity() {
                         controller = cameraController
                         cameraController.bindToLifecycle(lifecycleOwner)
                         cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                        // THIS LINE FIXES THE MIRRORING
+                        scaleX = -1f
                     }
                 },
                 modifier = Modifier.fillMaxSize()

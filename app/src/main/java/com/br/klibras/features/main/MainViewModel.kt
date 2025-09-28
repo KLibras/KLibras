@@ -6,14 +6,13 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.br.klibras.core.service.api.ApiService
+import com.br.klibras.util.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 
@@ -30,13 +29,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow<UiState>(UiState.Ready())
     val uiState: StateFlow<UiState> = _uiState
 
-    private val apiService: ApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl("http://192.168.15.8:8000") // tem que mudar isso aqui também
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ApiService::class.java)
-    }
+    private val apiService: ApiService = RetrofitInstance.apiService
 
     fun uploadVideoForAnalysis(videoUri: Uri?) {
         if (videoUri == null) {
