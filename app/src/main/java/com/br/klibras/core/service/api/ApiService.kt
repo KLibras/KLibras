@@ -6,7 +6,6 @@ import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
 
-// --- Data Classes ---
 
 data class LoginResponse(
     @SerializedName("access_token") val accessToken: String,
@@ -20,13 +19,12 @@ data class AnalysisResponse(
     val is_match: Boolean
 )
 
-// --- API Interfaces ---
+
 
 interface UserAuthService {
-    @Multipart // Use for multipart form data
+    @Multipart
     @POST("login")
     suspend fun login(
-        // Use @Part and RequestBody with @Multipart
         @Part("username") username: RequestBody,
         @Part("password") password: RequestBody
     ): Response<LoginResponse>

@@ -58,27 +58,22 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     var isPasswordError by remember { mutableStateOf(false) }
 
     val cornerRadius = 24.dp
-    // Collect the state from the ViewModel
     val loginState by loginViewModel.loginUiState.collectAsState()
 
-    // This block observes the login state. When it changes, it performs an action.
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginUiState.Success -> {
                 Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(context, MainActivity::class.java).apply {
-                    // Clear the back stack so the user can't go back to the login screen
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
                 startActivity(context, intent, null)
             }
             is LoginUiState.Error -> {
-                // Show an error message and then reset the state
                 Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-                // Assuming you add a function in your ViewModel to reset the state
-                // loginViewModel.dismissError()
+
             }
-            else -> { /* Idle or Loading state, do nothing here */ }
+            else -> {  }
         }
     }
 
@@ -153,7 +148,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = {
-                    // Validate fields and call the ViewModel
+
                     isEmailError = email.isBlank()
                     isPasswordError = password.isBlank()
                     if (!isEmailError && !isPasswordError) {
@@ -165,7 +160,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     .height(45.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)),
                 shape = RoundedCornerShape(cornerRadius),
-                // Disable the button while loading
+
                 enabled = loginState !is LoginUiState.Loading
             ) {
                 Text("Login", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -223,7 +218,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
         }
 
-        // Show a loading indicator when the state is Loading
         if (loginState is LoginUiState.Loading) {
             Box(
                 contentAlignment = Alignment.Center,

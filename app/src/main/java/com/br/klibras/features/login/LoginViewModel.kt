@@ -32,10 +32,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     val accessToken = response.body()!!.accessToken
                     val refreshToken = response.body()!!.refreshToken
 
-                    // Save the tokens
                     TokenManager.saveTokens(getApplication(), accessToken, refreshToken)
 
-                    // Immediately notify the UI of success so it can navigate
                     _loginUiState.value = LoginUiState.Success("Login and token save successful!")
 
                 } else {
