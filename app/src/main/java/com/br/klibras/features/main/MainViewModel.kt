@@ -5,8 +5,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.br.klibras.core.service.api.ApiService
-import com.br.klibras.util.RetrofitInstance
+import com.br.klibras.core.service.api.RecognitionService
+import com.br.klibras.core.utils.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,12 +24,14 @@ sealed class UiState {
     data class Error(val message: String) : UiState()
 }
 
+
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Ready())
     val uiState: StateFlow<UiState> = _uiState
 
-    private val apiService: ApiService = RetrofitInstance.apiService
+    // THIS IS THE FIX: It now gets the correct, authenticated API service.
+    private val recognitionApi: RecognitionService = RetrofitInstance.getRecognitionApi(application)
 
     fun uploadVideoForAnalysis(videoUri: Uri?) {
         if (videoUri == null) {
@@ -40,7 +42,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = UiState.Uploading()
             try {
-                val context = getApplication<Application>()
+                val context = getApplication<Application>().applicationContext
                 val file = File(context.cacheDir, "upload.mp4")
                 context.contentResolver.openInputStream(videoUri)?.use { input ->
                     FileOutputStream(file).use { output ->
@@ -58,7 +60,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     "expected_action", "obrigado"
                 )
 
-                val response = apiService.checkAction(expectedActionPart, videoPart)
+                val response = recognitionApi.uploadForAnalysis(
+                    expected_action = expectedActionPart,
+                    video = videoPart
+                )
 
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!

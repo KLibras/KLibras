@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,13 +58,12 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     var isPasswordError by remember { mutableStateOf(false) }
 
     val cornerRadius = 24.dp
-    val loginState = loginViewModel.loginUiState
+    // Collect the state from the ViewModel
+    val loginState by loginViewModel.loginUiState.collectAsState()
 
-    // This block observes the login state. When it changes to Success, it navigates.
-    // When it changes to Error, it shows a Toast.
-    /*
+    // This block observes the login state. When it changes, it performs an action.
     LaunchedEffect(loginState) {
-        when (loginState) {
+        when (val state = loginState) {
             is LoginUiState.Success -> {
                 Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(context, MainActivity::class.java).apply {
@@ -73,13 +73,15 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 startActivity(context, intent, null)
             }
             is LoginUiState.Error -> {
-                Toast.makeText(context, loginState.message, Toast.LENGTH_LONG).show()
-                loginViewModel.dismissError() // Reset state after showing the message
+                // Show an error message and then reset the state
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+                // Assuming you add a function in your ViewModel to reset the state
+                // loginViewModel.dismissError()
             }
             else -> { /* Idle or Loading state, do nothing here */ }
         }
     }
-    */
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -110,9 +112,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             OutlinedTextField(
                 value = email,
                 onValueChange = {
-                    if (it.length <= 50) {
-                        email = it
-                    }
+                    if (it.length <= 50) email = it
                     isEmailError = false
                 },
                 label = { Text("Insira seu email") },
@@ -128,9 +128,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             OutlinedTextField(
                 value = password,
                 onValueChange = {
-                    if (it.length <= 15) {
-                        password = it
-                    }
+                    if (it.length <= 15) password = it
                     isPasswordError = false
                 },
                 label = { Text("Insira sua senha") },
@@ -155,17 +153,19 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = {
-                    val intent = Intent(context, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    // Validate fields and call the ViewModel
+                    isEmailError = email.isBlank()
+                    isPasswordError = password.isBlank()
+                    if (!isEmailError && !isPasswordError) {
+                        loginViewModel.login(email, password)
                     }
-                    startActivity(context, intent, null)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)),
                 shape = RoundedCornerShape(cornerRadius),
-
+                // Disable the button while loading
                 enabled = loginState !is LoginUiState.Loading
             ) {
                 Text("Login", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -223,8 +223,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
         }
 
-
-        // Quando a API estiver carregando as resposta do resultado, vai ter um circulo de carregamento
+        // Show a loading indicator when the state is Loading
         if (loginState is LoginUiState.Loading) {
             Box(
                 contentAlignment = Alignment.Center,

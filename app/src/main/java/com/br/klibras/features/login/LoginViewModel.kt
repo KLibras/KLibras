@@ -1,69 +1,56 @@
 package com.br.klibras.features.login
 
 import android.app.Application
-import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.br.klibras.core.service.api.LoginRequest
-import com.br.klibras.core.service.api.UserService
-import com.br.klibras.util.RetrofitInstance
+import com.br.klibras.core.service.api.UserAuthService
+import com.br.klibras.core.utils.RetrofitInstance
 import com.br.klibras.core.utils.TokenManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
+    val loginUiState: StateFlow<LoginUiState> = _loginUiState
+
+    private val api: UserAuthService = RetrofitInstance.getUserAuthApi(application)
+
+    fun login(username: String, password: String) {
+        viewModelScope.launch {
+            _loginUiState.value = LoginUiState.Loading
+            try {
+                val userRequestBody = username.toRequestBody("text/plain".toMediaTypeOrNull())
+                val passRequestBody = password.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                val response = api.login(userRequestBody, passRequestBody)
+
+                if (response.isSuccessful && response.body() != null) {
+                    val accessToken = response.body()!!.accessToken
+                    val refreshToken = response.body()!!.refreshToken
+
+                    // Save the tokens
+                    TokenManager.saveTokens(getApplication(), accessToken, refreshToken)
+
+                    // Immediately notify the UI of success so it can navigate
+                    _loginUiState.value = LoginUiState.Success("Login and token save successful!")
+
+                } else {
+                    _loginUiState.value = LoginUiState.Error("Login failed: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _loginUiState.value = LoginUiState.Error(e.message ?: "An unknown error occurred")
+            }
+        }
+    }
+}
 
 sealed class LoginUiState {
     object Idle : LoginUiState()
     object Loading : LoginUiState()
+    data class Success(val message: String) : LoginUiState()
     data class Error(val message: String) : LoginUiState()
-    object Success : LoginUiState()
 }
-
-
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
-
-
-    var loginUiState: LoginUiState by mutableStateOf(LoginUiState.Idle)
-        private set
-
-
-    private val userApiService: UserService = RetrofitInstance.userApiService
-
-
-    fun login(context: Context, email: String, password: String) {
-        if (loginUiState is LoginUiState.Loading) {
-            return
-        }
-
-        loginUiState = LoginUiState.Loading
-
-        viewModelScope.launch {
-            try {
-                val response = userApiService.login(LoginRequest(username = email, password = password))
-
-                if (response.isSuccessful && response.code() == 200 && response.body() != null) {
-                    val loginResponse = response.body()!!
-                    TokenManager.saveTokens(
-                        getApplication(),
-                        loginResponse.accessToken,
-                        loginResponse.refreshToken
-                    )
-                    loginUiState = LoginUiState.Success
-                } else {
-                    val errorMsg = "Login failed: Code ${response.code()} - ${response.message()}"
-                    loginUiState = LoginUiState.Error(errorMsg)
-                }
-            } catch (e: Exception) {
-                val errorMsg = "An unexpected error occurred: ${e.message}"
-                loginUiState = LoginUiState.Error(errorMsg)
-            }
-        }
-    }
-
-    fun dismissError() {
-        loginUiState = LoginUiState.Idle
-    }
-}
-
