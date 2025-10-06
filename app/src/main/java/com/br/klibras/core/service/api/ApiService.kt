@@ -32,7 +32,7 @@ interface UserAuthService {
 
 interface RecognitionService {
     @Multipart
-    @POST("action/check_action/")
+    @POST("/check_action")
     suspend fun uploadForAnalysis(
         @Part expected_action: MultipartBody.Part,
         @Part video: MultipartBody.Part
