@@ -1,4 +1,4 @@
-package com.br.klibras.features.main
+package com.br.klibras.features.camera
 
 import android.app.Application
 import android.net.Uri
@@ -25,7 +25,7 @@ sealed class UiState {
     data class Error(val message: String) : UiState()
 }
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class CameraViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Ready())
     val uiState: StateFlow<UiState> = _uiState
