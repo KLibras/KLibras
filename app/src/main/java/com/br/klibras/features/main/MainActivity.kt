@@ -1,5 +1,6 @@
 package com.br.klibras.features.main
 
+import CameraScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +12,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.br.klibras.core.ui.theme.KLibrasTheme
-import com.br.klibras.features.camera.CameraScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

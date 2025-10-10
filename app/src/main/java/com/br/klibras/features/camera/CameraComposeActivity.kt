@@ -1,5 +1,6 @@
 package com.br.klibras.features.camera
 
+import CameraScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
