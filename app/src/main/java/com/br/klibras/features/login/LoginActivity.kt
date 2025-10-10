@@ -53,78 +53,96 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
 import com.br.klibras.features.main.MainActivity
 
+/**
+ * A tela de Login do aplicativo.
+ * @param loginViewModel O ViewModel que gerencia o estado e a lógica de login.
+ */
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
+    // Contexto atual, usado para navegação e Toasts.
     val context = LocalContext.current
+    // Estados para armazenar o email e a senha digitados pelo usuário.
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Estados para controlar a exibição de erros nos campos de texto.
     var isEmailError by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
 
-    val cornerRadius = 24.dp
+    // Raio dos cantos para os botões e campos de texto.
+    val cornerRadius = 15.dp
+    // Coleta o estado da UI do ViewModel para reagir a mudanças (Loading, Success, Error).
     val loginState by loginViewModel.loginUiState.collectAsState()
 
+    // Efeito que executa uma ação quando o loginState muda.
     LaunchedEffect(loginState) {
         when (val state = loginState) {
-            is LoginUiState.Success -> {
+            is LoginUiState.Success -> { // Em caso de sucesso
                 Toast.makeText(context, "Eai boy!", Toast.LENGTH_SHORT).show()
+                // Navega para a MainActivity e limpa a pilha de navegação.
                 val intent = Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
                 startActivity(context, intent, null)
             }
-            is LoginUiState.Error -> {
+            is LoginUiState.Error -> { // Em caso de erro
                 Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-
             }
-            else -> {  }
+            else -> { /* Não faz nada para outros estados como Idle */ }
         }
     }
 
-
+    // Box serve como um contêiner que permite sobrepor elementos (como o loading). 
     Box(modifier = Modifier.fillMaxSize()) {
+        // Column principal que organiza todo o conteúdo da tela verticalmente.
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize() // Ocupa todo o espaço disponível.
+                .background(MaterialTheme.colorScheme.background) // Cor de fundo do tema.
+                .padding(16.dp), // Espaçamento interno.
+            horizontalAlignment = Alignment.CenterHorizontally // Centraliza todo o conteúdo horizontalmente.
         ) {
+            // Espaçador para criar uma margem no topo.
             Spacer(modifier = Modifier.height(104.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            
+            // Row para o logo e o nome do app.
+            Row(verticalAlignment = Alignment.CenterVertically) { // Alinha itens verticalmente no centro.
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Libras Logo",
                     modifier = Modifier.size(63.dp, 56.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp)) // Espaço entre o logo e o texto.
                 Text(
                     text = "KLibras",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onBackground, // Cor do texto do tema.
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif
                 )
             }
 
-            Spacer(modifier = Modifier.height(64.dp))
+            Spacer(modifier = Modifier.height(64.dp)) // Espaço antes dos campos de texto.
+            
+            // Campo de texto para o email.
             OutlinedTextField(
                 value = email,
                 onValueChange = {
                     if (it.length <= 50) email = it
-                    isEmailError = false
+                    isEmailError = false // Reseta o erro ao digitar.
                 },
                 label = { Text("Insira seu email") },
                 leadingIcon = { Icon(painterResource(id = R.drawable.mail_svg), contentDescription = "Email icon") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(cornerRadius),
-                isError = isEmailError,
+                modifier = Modifier.fillMaxWidth(), // Ocupa toda a largura.
+                shape = RoundedCornerShape(cornerRadius), // Bordas arredondadas.
+                isError = isEmailError, // Mostra o estado de erro.
                 supportingText = { if (isEmailError) Text("Este campo não pode estar em branco", color = Color.Red) },
-                singleLine = true
+                singleLine = true // Força o campo a ter uma única linha.
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp)) // Espaço entre os campos.
+            
+            // Campo de texto para a senha.
             OutlinedTextField(
                 value = password,
                 onValueChange = {
@@ -133,7 +151,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 },
                 label = { Text("Insira sua senha") },
                 leadingIcon = { Icon(painterResource(id = R.drawable.lock_svg), contentDescription = "Password icon") },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = PasswordVisualTransformation(), // Esconde a senha.
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(cornerRadius),
@@ -143,17 +161,21 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+            
+            // Texto "Esqueceu a senha?".
             Text(
                 text = "Esqueceu a senha?",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 12.sp,
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.align(Alignment.End) // Alinha à direita.
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+            
+            // Botão de Login.
             Button(
                 onClick = {
-
+                    // Valida os campos antes de chamar o ViewModel.
                     isEmailError = email.isBlank()
                     isPasswordError = password.isBlank()
                     if (!isEmailError && !isPasswordError) {
@@ -163,36 +185,37 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)),
-                shape = RoundedCornerShape(cornerRadius),
-
-                enabled = loginState !is LoginUiState.Loading
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)), // Cor de fundo amarela.
+                shape = RoundedCornerShape(cornerRadius), // Bordas arredondadas.
+                enabled = loginState !is LoginUiState.Loading // Desabilita o botão durante o carregamento.
             ) {
                 Text("Login", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+            
+            // Divisor "ou".
             Row(verticalAlignment = Alignment.CenterVertically) {
                 HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    thickness = DividerDefaults.Thickness,
-                    color = Color(0xFFCCCCCC)
+                    modifier = Modifier.weight(1f), // Ocupa o espaço disponível.
+                    color = Color(0xFFCCCCCC) // Cor cinza clara.
                 )
                 Text(text = "ou", color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 8.dp))
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    thickness = DividerDefaults.Thickness,
                     color = Color(0xFFCCCCCC)
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            
+            // Botão de login com Google.
             Button(
                 onClick = { /* TODO: Implement Google Sign In */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Fundo branco.
                 shape = RoundedCornerShape(cornerRadius)
             ) {
                 Image(
@@ -201,26 +224,22 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Google", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "Google", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
-
-
             Spacer(modifier = Modifier.height(16.dp))
+            
+            // Texto e link para a tela de registro.
             Row {
-                Text(
-                    text = "Não tem uma conta? ",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 12.sp
-                )
                 ClickableText(
-                    text = AnnotatedString("Registre-se"),
+                    text = AnnotatedString("Não tem uma conta?  Registre-se"),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     ),
                     onClick = { 
+                        // Navega para a tela de registro.
                         val intent = Intent(context, RegisterComposeActivity::class.java)
                         startActivity(context, intent, null)
                     }
@@ -228,14 +247,15 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
         }
 
+        // Overlay de carregamento.
         if (loginState is LoginUiState.Loading) {
             Box(
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center, // Centraliza o indicador de progresso.
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f))
+                    .background(Color.Black.copy(alpha = 0.4f)) // Fundo semitransparente.
             ) {
-                CircularProgressIndicator(color = Color(0xFFDEBC32))
+                CircularProgressIndicator(color = Color(0xFFDEBC32)) // Indicador de progresso amarelo.
             }
         }
     }
