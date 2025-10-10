@@ -22,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,7 +83,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F5DC))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -96,7 +97,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "KLibras",
-                    color = Color(0xFF333333),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif
@@ -140,7 +141,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Esqueceu a senha?",
-                color = Color(0xFF333333),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 12.sp,
                 modifier = Modifier.align(Alignment.End)
             )
@@ -173,7 +174,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     thickness = DividerDefaults.Thickness,
                     color = Color(0xFFCCCCCC)
                 )
-                Text(text = "ou", color = Color(0xFF333333), modifier = Modifier.padding(horizontal = 8.dp))
+                Text(text = "ou", color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 8.dp))
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     thickness = DividerDefaults.Thickness,
@@ -196,7 +197,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Google", color = Color(0xFF333333), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "Google", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
 
@@ -205,12 +206,12 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             Row {
                 Text(
                     text = "Não tem uma conta?",
-                    color = Color(0xFF333333),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 12.sp
                 )
                 Text(
                     text = "Registre-se",
-                    color = Color(0xFF333333),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 4.dp)
