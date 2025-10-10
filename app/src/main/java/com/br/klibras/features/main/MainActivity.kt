@@ -4,25 +4,11 @@ package com.br.klibras.features.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -30,13 +16,23 @@ import androidx.navigation.compose.rememberNavController
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.KLibrasTheme
 
-sealed class Screen(val route: String, val icon: Int, val label: String) {
+/**
+ * Define as diferentes telas do aplicativo para o sistema de navegação.
+ * @param route A rota de navegação única para a tela.
+ * @param icon O recurso do ícone (opcional), usado na barra de navegação inferior.
+ * @param label O nome da tela (opcional), usado na barra de navegação inferior.
+ */
+sealed class Screen(val route: String, val icon: Int? = null, val label: String? = null) {
     object Learning : Screen("learning_screen", R.drawable.aprenda_logo, "Aprenda")
     object Ranking : Screen("ranking_screen", R.drawable.ranking_logo, "Ranking")
     object Dex : Screen("dex_screen", R.drawable.dex_logo, "Dex")
     object Account : Screen("account_screen", R.drawable.conta_logo, "Conta")
+    object GestureLearning : Screen("gesture_learning_screen")
 }
 
+/**
+ * A Activity principal que hospeda os Composables da navegação principal do app.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,88 +44,49 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * O Composable principal que configura a estrutura da tela, incluindo a barra de navegação
+ * e o host de navegação que gerencia a troca de telas.
+ */
 @Composable
 fun MainScreen() {
+    // Cria e lembra o controlador de navegação para todo o escopo do MainScreen.
     val navController = rememberNavController()
-    val items = listOf(
-        Screen.Learning,
-        Screen.Ranking,
-        Screen.Dex,
-        Screen.Account,
+    // Observa a pilha de navegação para obter a rota da tela atual.
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Lista de rotas que devem exibir a barra de navegação inferior.
+    val bottomBarScreens = listOf(
+        Screen.Learning.route,
+        Screen.Ranking.route,
+        Screen.Dex.route,
+        Screen.Account.route
     )
 
+    // Scaffold fornece a estrutura de layout com slots para TopBar, BottomBar, etc.
     Scaffold(
+        // Define o conteúdo da barra de navegação inferior.
         bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.background,
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    items.forEach { screen ->
-                        BottomNavItem(
-                            icon = screen.icon,
-                            label = screen.label,
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        )
-                    }
-                }
+            // A barra só é exibida se a rota atual estiver na lista 'bottomBarScreens'.
+            if (currentRoute in bottomBarScreens) {
+                AppBottomNavigationBar(navController = navController)
             }
         }
-    ) { paddingValues ->
+    ) { paddingValues -> // paddingValues contém os espaçamentos necessários para a barra de navegação.
+        // NavHost é o contêiner que exibe o destino de navegação atual.
         NavHost(
             navController = navController,
-            startDestination = Screen.Learning.route,
+            startDestination = Screen.Learning.route, // A primeira tela a ser exibida.
+            // Aplica o padding para que o conteúdo da tela não fique sob a barra de navegação.
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(Screen.Learning.route) { LearningScreen() }
-            composable(Screen.Ranking.route) { Text("Ranking Screen") }
-            composable(Screen.Dex.route) { Text("Dex Screen") }
-            composable(Screen.Account.route) { Text("Account Screen") }
+            // Define o Composable para cada rota de navegação.
+            composable(Screen.Learning.route) { LearningScreen(navController = navController) }
+            composable(Screen.Ranking.route) { Text("Ranking Screen") } // Placeholder
+            composable(Screen.Dex.route) { Text("Dex Screen") } // Placeholder
+            composable(Screen.Account.route) { Text("Account Screen") } // Placeholder
+            composable(Screen.GestureLearning.route) { GestureLearningScreen(navController = navController) }
         }
-    }
-}
-
-@Composable
-fun RowScope.BottomNavItem(
-    icon: Int,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        val color = if (selected) Color(0xFFDEBC32) else MaterialTheme.colorScheme.onBackground
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = label,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = label,
-            color = color,
-            fontSize = 12.sp
-        )
     }
 }
