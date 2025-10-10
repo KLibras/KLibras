@@ -23,10 +23,16 @@
         <activity
             android:name=".features.login.LoginComposeActivity"
             android:exported="true"
-            android:theme="@style/Theme.KLibras"> <intent-filter>
+            android:theme="@style/Theme.App.Starting"> <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".features.login.RegisterComposeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KLibras">
         </activity>
 
         <activity

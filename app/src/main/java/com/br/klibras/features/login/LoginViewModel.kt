@@ -22,7 +22,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _loginUiState.value = LoginUiState.Loading
-            try {
+            _loginUiState.value = LoginUiState.Success("Login Sucessful!") //pulei o login por enquanto //
+            /*try {
                 val userRequestBody = username.toRequestBody("text/plain".toMediaTypeOrNull())
                 val passRequestBody = password.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -41,7 +42,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 _loginUiState.value = LoginUiState.Error(e.message ?: "An unknown error occurred")
-            }
+            }*/
         }
     }
 }

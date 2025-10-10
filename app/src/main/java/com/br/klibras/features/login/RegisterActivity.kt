@@ -1,39 +1,20 @@
 
 package com.br.klibras.features.login
 
+import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,43 +26,36 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
+import com.br.klibras.core.ui.theme.KLibrasTheme
 import com.br.klibras.features.main.MainActivity
 
+class RegisterComposeActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            KLibrasTheme(dynamicColor = false) {
+                RegisterScreen()
+            }
+        }
+    }
+}
+
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
+fun RegisterScreen() {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     var isEmailError by remember { mutableStateOf(false) }
+    var isUsernameError by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
 
     val cornerRadius = 24.dp
-    val loginState by loginViewModel.loginUiState.collectAsState()
-
-    LaunchedEffect(loginState) {
-        when (val state = loginState) {
-            is LoginUiState.Success -> {
-                Toast.makeText(context, "Eai boy!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(context, intent, null)
-            }
-            is LoginUiState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-
-            }
-            else -> {  }
-        }
-    }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -109,6 +83,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
 
             Spacer(modifier = Modifier.height(64.dp))
+
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -123,8 +98,25 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 supportingText = { if (isEmailError) Text("Este campo não pode estar em branco", color = Color.Red) },
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = {
+                    if (it.length <= 20) username = it
+                    isUsernameError = false
+                },
+                label = { Text("Insira seu nome de usuário") },
+                leadingIcon = { Icon(painterResource(id = R.drawable.account_svg), contentDescription = "User icon") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(cornerRadius),
+                isError = isUsernameError,
+                supportingText = { if (isUsernameError) Text("Este campo não pode estar em branco", color = Color.Red) },
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = password,
                 onValueChange = {
@@ -142,36 +134,29 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Esqueceu a senha?",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 12.sp,
-                modifier = Modifier.align(Alignment.End)
-            )
-
             Spacer(modifier = Modifier.height(32.dp))
+
             Button(
                 onClick = {
-
                     isEmailError = email.isBlank()
+                    isUsernameError = username.isBlank()
                     isPasswordError = password.isBlank()
-                    if (!isEmailError && !isPasswordError) {
-                        loginViewModel.login(email, password)
+                    if (!isEmailError && !isPasswordError && !isUsernameError) {
+                        // TODO: Implement registration logic
+                        Toast.makeText(context, "Registro Clicado!", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)),
-                shape = RoundedCornerShape(cornerRadius),
-
-                enabled = loginState !is LoginUiState.Loading
+                shape = RoundedCornerShape(cornerRadius)
             ) {
-                Text("Login", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Registre-se", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
@@ -187,6 +172,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = { /* TODO: Implement Google Sign In */ },
                 modifier = Modifier
@@ -204,45 +190,27 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 Text(text = "Google", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
-
-
             Spacer(modifier = Modifier.height(16.dp))
+
             Row {
                 Text(
-                    text = "Não tem uma conta? ",
+                    text = "Tem uma conta? ",
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 12.sp
                 )
                 ClickableText(
-                    text = AnnotatedString("Registre-se"),
+                    text = AnnotatedString("Faça login"),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    onClick = { 
-                        val intent = Intent(context, RegisterComposeActivity::class.java)
-                        startActivity(context, intent, null)
+                    onClick = {
+                        val activity = (context as? Activity)
+                        activity?.finish()
                     }
                 )
             }
         }
-
-        if (loginState is LoginUiState.Loading) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f))
-            ) {
-                CircularProgressIndicator(color = Color(0xFFDEBC32))
-            }
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
 }
