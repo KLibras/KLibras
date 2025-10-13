@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.KLibrasTheme
 
@@ -86,7 +88,16 @@ fun MainScreen() {
             composable(Screen.Ranking.route) { Text("Ranking Screen") } // Placeholder
             composable(Screen.Dex.route) { Text("Dex Screen") } // Placeholder
             composable(Screen.Account.route) { Text("Account Screen") } // Placeholder
-            composable(Screen.GestureLearning.route) { GestureLearningScreen(navController = navController) }
+            
+            // Define a rota para a tela de aprendizado, que agora aceita um argumento {gestureName}.
+            composable(
+                route = "${Screen.GestureLearning.route}/{gestureName}",
+                arguments = listOf(navArgument("gestureName") { type = NavType.StringType })
+            ) {
+                // Extrai o argumento da rota e o passa para a tela.
+                val gestureName = it.arguments?.getString("gestureName") ?: ""
+                GestureLearningScreen(navController = navController, gestureName = gestureName)
+            }
         }
     }
 }
