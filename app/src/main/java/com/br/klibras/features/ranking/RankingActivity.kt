@@ -37,7 +37,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.Copper
-import com.br.klibras.features.main.AppBottomNavigationBar
+import com.br.klibras.shared.AppBottomNavigationBar
 import com.br.klibras.core.ui.theme.HighlightYellow
 import com.br.klibras.core.ui.theme.Khaki
 

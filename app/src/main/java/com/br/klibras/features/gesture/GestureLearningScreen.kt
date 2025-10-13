@@ -1,5 +1,4 @@
-
-package com.br.klibras.features.main
+package com.br.klibras.features.gesture
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -16,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -26,6 +24,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import com.br.klibras.R
+import com.br.klibras.features.main.Screen
 
 // Lista ordenada de todos os gestos, que define a sequência de navegação.
 private val gestureFlow = listOf(

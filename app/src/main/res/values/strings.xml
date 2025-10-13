@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">KLibras</string>
     <string name="start_recording">Start Recording</string>
+    <string name="server_client_id">179236694177-f1up9ce2ujp2ei1b6t0oe1ipp6fbv0t9.apps.googleusercontent.com</string>
 </resources>

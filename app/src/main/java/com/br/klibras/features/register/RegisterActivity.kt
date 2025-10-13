@@ -1,5 +1,4 @@
-
-package com.br.klibras.features.login
+package com.br.klibras.features.register
 
 import android.app.Activity
 import android.os.Bundle

@@ -95,5 +95,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.material)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.material.icons.extended)
+
+
+    // Dependencias pra fazer login do google
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
 }

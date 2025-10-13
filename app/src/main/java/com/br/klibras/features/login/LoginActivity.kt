@@ -1,44 +1,23 @@
-
 package com.br.klibras.features.login
 
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -49,9 +28,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
 import com.br.klibras.features.main.MainActivity
+import com.br.klibras.features.register.RegisterComposeActivity
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption // Corrected import
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 
 /**
  * A tela de Login do aplicativo.
@@ -61,6 +47,7 @@ import com.br.klibras.features.main.MainActivity
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     // Contexto atual, usado para navegação e Toasts.
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     // Estados para armazenar o email e a senha digitados pelo usuário.
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -74,25 +61,27 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     // Coleta o estado da UI do ViewModel para reagir a mudanças (Loading, Success, Error).
     val loginState by loginViewModel.loginUiState.collectAsState()
 
+    // O serverClientId deve estar no seu arquivo strings.xml.
+    // Certifique-se de que o valor está correto.
+    val serverClientId = stringResource(id = R.string.server_client_id)
+    val credentialManager = remember(context) { CredentialManager.create(context) }
+
     // Efeito que executa uma ação quando o loginState muda.
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginUiState.Success -> { // Em caso de sucesso
-                Toast.makeText(context, "Eai boy!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Login bem-sucedido!", Toast.LENGTH_SHORT).show()
                 // Navega para a MainActivity e limpa a pilha de navegação.
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(context, intent, null)
+                navigateToMain(context)
             }
             is LoginUiState.Error -> { // Em caso de erro
                 Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
             }
-            else -> { /* Não faz nada para outros estados como Idle */ }
+            else -> { /* Não faz nada para outros estados como Idle ou Loading */ }
         }
     }
 
-    // Box serve como um contêiner que permite sobrepor elementos (como o loading). 
+    // Box serve como um contêiner que permite sobrepor elementos (como o loading).
     Box(modifier = Modifier.fillMaxSize()) {
         // Column principal que organiza todo o conteúdo da tela verticalmente.
         Column(
@@ -104,7 +93,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
         ) {
             // Espaçador para criar uma margem no topo.
             Spacer(modifier = Modifier.height(104.dp))
-            
+
             // Row para o logo e o nome do app.
             Row(verticalAlignment = Alignment.CenterVertically) { // Alinha itens verticalmente no centro.
                 Image(
@@ -123,7 +112,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
 
             Spacer(modifier = Modifier.height(64.dp)) // Espaço antes dos campos de texto.
-            
+
             // Campo de texto para o email.
             OutlinedTextField(
                 value = email,
@@ -141,7 +130,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             )
 
             Spacer(modifier = Modifier.height(16.dp)) // Espaço entre os campos.
-            
+
             // Campo de texto para a senha.
             OutlinedTextField(
                 value = password,
@@ -161,7 +150,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Texto "Esqueceu a senha?".
             Text(
                 text = "Esqueceu a senha?",
@@ -171,7 +160,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             // Botão de Login.
             Button(
                 onClick = {
@@ -193,25 +182,53 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             // Divisor "ou".
             Row(verticalAlignment = Alignment.CenterVertically) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f), // Ocupa o espaço disponível.
-                    color = Color(0xFFCCCCCC) // Cor cinza clara.
-                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFCCCCCC))
                 Text(text = "ou", color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 8.dp))
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = Color(0xFFCCCCCC)
-                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFCCCCCC))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Botão de login com Google.
             Button(
-                onClick = { /* TODO: Implement Google Sign In */ },
+                onClick = {
+                    // --- CHANGED BLOCK START ---
+                    val getGoogleIdOption = GetGoogleIdOption.Builder()
+                        .setServerClientId(serverClientId)
+                        .setFilterByAuthorizedAccounts(false)
+                        .build()
+
+                    val credentialRequest = GetCredentialRequest.Builder()
+                        .addCredentialOption(getGoogleIdOption)
+                        .build()
+                    // --- CHANGED BLOCK END ---
+
+                    coroutineScope.launch {
+                        try {
+                            val result = credentialManager.getCredential(context, credentialRequest)
+                            val credential = result.credential
+
+                            if (credential is GoogleIdTokenCredential) {
+                                val idToken = credential.idToken
+                                Log.d("GoogleSignIn", "ID Token recebido: $idToken")
+
+                                // TODO: Envie o idToken para o seu backend para verificação e autenticação.
+                                Toast.makeText(context, "Login com Google bem-sucedido!", Toast.LENGTH_SHORT).show()
+                                navigateToMain(context)
+
+                            } else {
+                                Log.e("GoogleSignIn", "A credencial não é do tipo GoogleIdTokenCredential")
+                                Toast.makeText(context, "Erro no login com Google.", Toast.LENGTH_LONG).show()
+                            }
+                        } catch (e: GetCredentialException) {
+                            Log.e("GoogleSignIn", "Erro ao obter credencial: ${e.message}", e)
+                            Toast.makeText(context, "Falha no login com Google.", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
@@ -228,7 +245,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Texto e link para a tela de registro.
             Row {
                 ClickableText(
@@ -238,7 +255,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    onClick = { 
+                    onClick = {
                         // Navega para a tela de registro.
                         val intent = Intent(context, RegisterComposeActivity::class.java)
                         startActivity(context, intent, null)
@@ -261,8 +278,20 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     }
 }
 
+/**
+ * Função auxiliar para centralizar a navegação para a tela principal.
+ */
+private fun navigateToMain(context: Context) {
+    val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    startActivity(context, intent, null)
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen()
+    // Para o preview funcionar, você pode precisar de um ViewModel de mock/preview
+    // ou garantir que seu ViewModel padrão tenha um construtor vazio.
+    // LoginScreen()
 }

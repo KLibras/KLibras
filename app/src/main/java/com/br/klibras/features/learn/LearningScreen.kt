@@ -1,5 +1,4 @@
-
-package com.br.klibras.features.main
+package com.br.klibras.features.learn
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.br.klibras.R
+import com.br.klibras.features.main.Screen
 
 /**
  * A tela principal de aprendizado, que exibe os módulos como uma árvore.

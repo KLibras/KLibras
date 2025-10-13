@@ -1,5 +1,4 @@
-
-package com.br.klibras.features.main
+package com.br.klibras.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.br.klibras.features.main.Screen
 
 /**
  * A barra de navegação inferior principal do aplicativo.

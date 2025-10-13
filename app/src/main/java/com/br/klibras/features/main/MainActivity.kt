@@ -17,6 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.KLibrasTheme
+import com.br.klibras.features.gesture.GestureLearningScreen
+import com.br.klibras.features.learn.LearningScreen
+import com.br.klibras.shared.AppBottomNavigationBar
 
 /**
  * Define as diferentes telas do aplicativo para o sistema de navegação.
