@@ -59,25 +59,57 @@ fun TreeSection(navController: NavController) {
         // Adiciona um espaçamento vertical de 16.dp entre cada filho direto (NodeItem, Spacer, Row).
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Nó raiz da árvore.
+        // Linha 1: Introdução
         NodeItem(
             icon = R.drawable.introducao_logo, 
             label = "Introdução",
-            // Define a ação de clique para navegar para a tela de aprendizado de gestos.
-            onClick = { navController.navigate(Screen.GestureLearning.route) }
+            onClick = { navController.navigate("${Screen.GestureLearning.route}/introducao") }
         )
         
-        // Espaçador para criar a linha de conexão visual entre o nó pai e os filhos.
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Linha que organiza os nós filhos lado a lado.
+        // Linha 2: Bom dia e Tudo bem?
         Row(
-            // Adiciona um espaçamento horizontal de 64.dp entre os nós filhos.
             horizontalArrangement = Arrangement.spacedBy(64.dp)
         ) {
-            NodeItem(icon = R.drawable.em_preparacao_logo, label = "Em preparação")
-            NodeItem(icon = R.drawable.em_preparacao_logo, label = "Em preparação")
+            NodeItem(
+                icon = R.drawable.em_preparacao_logo, 
+                label = "Bom dia",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/bom_dia") }
+            )
+            NodeItem(
+                icon = R.drawable.em_preparacao_logo, 
+                label = "Tudo bem?",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/tudo_bem") }
+            )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Linha 3: Qual seu nome? e Obrigado
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(64.dp)
+        ) {
+            NodeItem(
+                icon = R.drawable.em_preparacao_logo, 
+                label = "Qual seu nome?",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/qual_seu_nome") }
+            )
+            NodeItem(
+                icon = R.drawable.em_preparacao_logo, 
+                label = "Obrigado",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/obrigado") }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Linha 4: Em preparação
+        NodeItem(
+            icon = R.drawable.em_preparacao_logo, 
+            label = "Em preparação",
+            onClick = { navController.navigate("${Screen.GestureLearning.route}/em_preparacao") }
+        )
     }
 }
 
