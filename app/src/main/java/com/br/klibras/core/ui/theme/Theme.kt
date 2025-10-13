@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 // ----------------------------------------------------------------------------------
 
 private val DarkColorScheme = darkColorScheme(
-    primary = HighlightYelow,      // Amarelo para destaque (botões)
+    primary = HighlightYellow,      // Amarelo para destaque (botões)
     onPrimary = Black100,          // Texto sobre o primário
 
     background = Grey100,          // <-- CHAVE: Fundo ESCURO para Dark Theme
@@ -29,7 +29,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = HighlightYelow,      // Amarelo para destaque
+    primary = HighlightYellow,      // Amarelo para destaque
     onPrimary = Black100,          // Texto sobre o primário
 
     background = Beige,            // <-- CHAVE: Fundo CLARO para Light Theme

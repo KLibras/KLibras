@@ -4,30 +4,48 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
+import com.br.klibras.R
 
+
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val josefinSansFontName = GoogleFont("Josefin Sans")
+val robotoFontName = GoogleFont("Roboto")
+
+
+
+// Fonte principal pra titulos, logo etc
+val JosefinSans = FontFamily(
+    Font(googleFont = josefinSansFontName, fontProvider = provider, weight = FontWeight.Light),
+    Font(googleFont = josefinSansFontName, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = josefinSansFontName, fontProvider = provider, weight = FontWeight.SemiBold),
+    Font(googleFont = josefinSansFontName, fontProvider = provider, weight = FontWeight.Bold)
+)
+
+
+// Fonte não principal pra texto longos/ semi-importantes etc
+
+val Roboto = FontFamily(
+    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Medium),
+    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Bold)
+)
+
+
+
+// Tipografia do app
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-    */
+    displayLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.Bold, fontSize = 57.sp),
+    headlineLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.SemiBold, fontSize = 32.sp),
+    titleLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.SemiBold, fontSize = 22.sp),
+    bodyLarge = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Normal, fontSize = 16.sp),
+    bodyMedium = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Normal, fontSize = 14.sp),
+    labelSmall = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 11.sp)
 )
