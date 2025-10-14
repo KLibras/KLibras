@@ -2,13 +2,17 @@ package com.br.klibras.features.learn
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.br.klibras.R
+import com.br.klibras.core.ui.theme.HighlightYellow
 import com.br.klibras.features.main.Screen
 
 /**
@@ -33,7 +38,7 @@ fun LearningScreen(navController: NavController) {
             .background(MaterialTheme.colorScheme.background) // Define a cor de fundo com base no tema.
             .verticalScroll(rememberScrollState()) // Adiciona a capacidade de rolagem.
             .padding(16.dp), // Adiciona um espaçamento interno de 16.dp em todos os lados.
-        
+
         // Alinha todos os filhos (o conteúdo) no centro horizontal da tela.
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -61,55 +66,27 @@ fun TreeSection(navController: NavController) {
     ) {
         // Linha 1: Introdução
         NodeItem(
-            icon = R.drawable.introducao_logo, 
+            icon = R.drawable.introducao_logo,
             label = "Introdução",
             onClick = { navController.navigate("${Screen.GestureLearning.route}/introducao") }
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Linha 2: Bom dia e Tudo bem?
         Row(
             horizontalArrangement = Arrangement.spacedBy(64.dp)
         ) {
             NodeItem(
-                icon = R.drawable.em_preparacao_logo, 
-                label = "Bom dia",
-                onClick = { navController.navigate("${Screen.GestureLearning.route}/bom_dia") }
+                icon = R.drawable.em_preparacao_logo,
+                label = "??",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/em_preparacao") }
             )
             NodeItem(
-                icon = R.drawable.em_preparacao_logo, 
-                label = "Tudo bem?",
-                onClick = { navController.navigate("${Screen.GestureLearning.route}/tudo_bem") }
+                icon = R.drawable.em_preparacao_logo,
+                label = "??",
+                onClick = { navController.navigate("${Screen.GestureLearning.route}/em_preparacao") }
             )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Linha 3: Qual seu nome? e Obrigado
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(64.dp)
-        ) {
-            NodeItem(
-                icon = R.drawable.em_preparacao_logo, 
-                label = "Qual seu nome?",
-                onClick = { navController.navigate("${Screen.GestureLearning.route}/qual_seu_nome") }
-            )
-            NodeItem(
-                icon = R.drawable.em_preparacao_logo, 
-                label = "Obrigado",
-                onClick = { navController.navigate("${Screen.GestureLearning.route}/obrigado") }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Linha 4: Em preparação
-        NodeItem(
-            icon = R.drawable.em_preparacao_logo, 
-            label = "Em preparação",
-            onClick = { navController.navigate("${Screen.GestureLearning.route}/em_preparacao") }
-        )
     }
 }
 
@@ -121,27 +98,47 @@ fun TreeSection(navController: NavController) {
  */
 @Composable
 fun NodeItem(icon: Int, label: String, onClick: (() -> Unit)? = null) {
+    val interactionSource = remember { MutableInteractionSource() }
     Column(
         // Alinha o ícone e o texto do nó no centro horizontal.
         horizontalAlignment = Alignment.CenterHorizontally,
         // Torna a coluna clicável se uma função onClick for fornecida.
-        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+        modifier = if (onClick != null) Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = rememberRipple(bounded = false),
+            onClick = onClick
+        ) else Modifier
     ) {
-        // Box que desenha o círculo de fundo para o ícone.
+
+
+        // Box externo que desenha a borda amarela.
         Box(
             modifier = Modifier
-                .size(80.dp) // Define um tamanho fixo de 80x80 dp.
-                .clip(CircleShape) // Corta o Box em um formato de círculo.
-                .background(Color(0xFFDEBC32)), // Cor de fundo amarela.
-            // Alinha o conteúdo (a imagem) no centro do Box.
+                .clip(CircleShape) // Garante que a borda e o padding sejam circulares.
+                .border(
+                    width = 2.dp, // Espessura da borda
+                    color = HighlightYellow, // Cor da borda
+                    shape = CircleShape
+                )
+                .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = label,
-                modifier = Modifier.size(48.dp) // Define o tamanho do ícone dentro do círculo.
-            )
+            // Box interno que desenha o círculo de fundo para o ícone.
+            Box(
+                modifier = Modifier
+                    .size(80.dp) // Tamanho do círculo amarelo.
+                    .clip(CircleShape)
+                    .background(HighlightYellow),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = label,
+                    modifier = Modifier.size(48.dp) // Tamanho do ícone dentro do círculo.
+                )
+            }
         }
+
         // Espaçador vertical entre o círculo e o texto.
         Spacer(modifier = Modifier.height(8.dp))
         // Texto do nó.

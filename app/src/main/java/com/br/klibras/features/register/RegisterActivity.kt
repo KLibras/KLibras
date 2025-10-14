@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.br.klibras.R
+import com.br.klibras.core.ui.theme.JosefinSans
 import com.br.klibras.core.ui.theme.KLibrasTheme
 
 /**
@@ -89,7 +90,7 @@ fun RegisterScreen() {
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif
+                    fontFamily = JosefinSans
                 )
             }
 
@@ -168,7 +169,7 @@ fun RegisterScreen() {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)), // Cor de fundo amarela.
                 shape = RoundedCornerShape(cornerRadius) // Bordas arredondadas.
             ) {
-                Text("Registre-se", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Registre-se", color = Color.Black, fontFamily = JosefinSans, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))

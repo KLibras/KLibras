@@ -33,11 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.Copper
-import com.br.klibras.shared.AppBottomNavigationBar
 import com.br.klibras.core.ui.theme.HighlightYellow
 import com.br.klibras.core.ui.theme.Khaki
 
@@ -45,7 +42,7 @@ import com.br.klibras.core.ui.theme.Khaki
 data class User(val username: String, val points: Int)
 
 @Composable
-fun RankingScreen(navController: NavController, users: List<User>) {
+fun RankingScreen(users: List<User>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +59,7 @@ fun RankingScreen(navController: NavController, users: List<User>) {
                 modifier = Modifier.size(63.dp, 56.dp)
             )
             Text(
-                text = "Libras",
+                text = "KLibras",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
@@ -96,7 +93,6 @@ fun RankingScreen(navController: NavController, users: List<User>) {
             modifier = Modifier.padding(vertical = 25.dp)
         )
 
-        AppBottomNavigationBar(navController = navController)
     }
 }
 
@@ -148,7 +144,7 @@ fun RankingItem(rank: Int, user: User) {
 @Preview(showBackground = true)
 @Composable
 fun RankingScreenPreview() {
-    val navController = rememberNavController()
+
 
     val mockUsers = listOf(
         User("Username", 100),
@@ -158,5 +154,5 @@ fun RankingScreenPreview() {
         User("Username", 95)
     )
 
-    RankingScreen(navController = navController, users = mockUsers)
+    RankingScreen(users = mockUsers)
 }

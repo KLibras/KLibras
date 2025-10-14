@@ -29,10 +29,6 @@ import com.br.klibras.features.main.Screen
 // Lista ordenada de todos os gestos, que define a sequência de navegação.
 private val gestureFlow = listOf(
     "introducao",
-    "bom_dia",
-    "tudo_bem",
-    "qual_seu_nome",
-    "obrigado",
     "em_preparacao"
 )
 
@@ -58,12 +54,8 @@ fun GestureLearningScreen(navController: NavController, gestureName: String) {
     // com base no 'gestureName' recebido.
     val (title, videoResId, description) = when (gestureName) {
         "introducao" -> Triple("Introdução", 0, "O kLibras é seu professor de bolso para a Língua Brasileira de Sinais. Use a câmera do celular e a Inteligência Artificial para identificar sinais. Com ele, você aprende e registra seu progresso no vocabulário de Libras.")
-        "bom_dia" -> Triple("Bom dia", R.raw.bom_dia, "\"Bom Dia\" é a saudação utilizada para o período matinal. O sinal é composto por duas partes: 'BOM' e 'DIA'. Para 'BOM', inicie com a mão fechada próxima à boca e abra-a rapidamente para frente. Para 'DIA', use a configuração de mão em 'D' (indicador esticado) e toque a ponta do indicador na têmpora, elevando-a para cima em seguida, simulando o nascer do sol.")
-        "tudo_bem" -> Triple("Tudo bem?", R.raw.tudo_bem, "Este é um cumprimento utilizado para questionar o bem-estar de alguém. Para sinalizar \"Tudo Bem?\", gire a mão aberta (ou em configuração de \"joia\", com o polegar esticado) para frente e para trás, na altura do peito, ou use o sinal de 'BOM' seguido pelo sinal de 'JOIA'. É essencial acompanhar o sinal com a expressão facial de pergunta (sobrancelhas levemente levantadas).")
-        "qual_seu_nome" -> Triple("Qual seu nome?", R.raw.qual_seu_nome, "Para perguntar o nome de alguém, utilize a configuração de mão em \"U\" (indicador e médio esticados e unidos). Toque a ponta desses dedos no peito duas vezes. Este é o sinal de 'NOME'. Na sequência, aponte a mão aberta na direção da pessoa (sinal de 'SEU'), mantendo a expressão facial de pergunta. O sinal combina 'NOME' + 'SEU' com a expressão de questionamento.")
-        "obrigado" -> Triple("Obrigado", R.raw.obrigado, "O sinal de \"Obrigado\" expressa gratidão e é neutro em relação ao gênero. A configuração de mão é aberta, com os dedos unidos. Leve a mão aberta até o queixo e projete-a levemente para frente e para cima, na direção do interlocutor, com um movimento breve e decidido. O agradecimento pode ser reforçado com uma expressão facial de contentamento.")
         // Caso padrão para gestos futuros ou não mapeados.
-        else -> Triple("Em preparação", 0, "Estamos precisando de orçamento pra isso.")
+        else -> Triple("Em preparação", 0, "Módulo ainda em preparação")
     }
 
     // Encontra a posição (índice) do gesto atual na lista de fluxo para a navegação "Próximo/Anterior".

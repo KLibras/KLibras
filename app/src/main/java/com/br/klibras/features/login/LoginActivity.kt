@@ -33,6 +33,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
+import com.br.klibras.core.ui.theme.JosefinSans
 import com.br.klibras.features.main.MainActivity
 import com.br.klibras.features.register.RegisterComposeActivity
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption // Corrected import
@@ -107,7 +108,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     color = MaterialTheme.colorScheme.onBackground, // Cor do texto do tema.
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif
+                    fontFamily = JosefinSans
                 )
             }
 
@@ -164,12 +165,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             // Botão de Login.
             Button(
                 onClick = {
-                    // Valida os campos antes de chamar o ViewModel.
-                    isEmailError = email.isBlank()
-                    isPasswordError = password.isBlank()
-                    if (!isEmailError && !isPasswordError) {
-                        loginViewModel.login(email, password)
-                    }
+                    navigateToMain(context)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -178,7 +174,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 shape = RoundedCornerShape(cornerRadius), // Bordas arredondadas.
                 enabled = loginState !is LoginUiState.Loading // Desabilita o botão durante o carregamento.
             ) {
-                Text("Login", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Login", color = Color.Black, fontFamily = JosefinSans, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))

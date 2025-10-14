@@ -30,20 +30,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.JosefinSans
-import com.br.klibras.shared.AppBottomNavigationBar
+
 
 val HighlightYellow = Color(0xFFDEBC32)
 
 data class Sign(val name: String)
 
 @Composable
-fun ConqueredSignsScreen(navController: NavController, conqueredSigns: List<Sign>) {
+fun DexScreen(knownSigns: List<Sign>) {
     val allPossibleSigns = listOf("Bom dia", "Boa tarde", "Boa noite", "Obrigado")
-    val conqueredSignNames = conqueredSigns.map { it.name }.toSet()
+    val knownSignNames = knownSigns.map { it.name }.toSet()
 
     Column(
         modifier = Modifier
@@ -57,11 +55,11 @@ fun ConqueredSignsScreen(navController: NavController, conqueredSigns: List<Sign
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Libras Logo",
+                contentDescription = "KLibras Logo",
                 modifier = Modifier.size(63.dp, 56.dp)
             )
             Text(
-                text = "Libras",
+                text = "KLibras",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
@@ -87,7 +85,7 @@ fun ConqueredSignsScreen(navController: NavController, conqueredSigns: List<Sign
             allPossibleSigns.forEach { signName ->
                 SignItem(
                     signName = signName,
-                    isConquered = signName in conqueredSignNames
+                    isknown = signName in knownSignNames
                 )
             }
         }
@@ -99,15 +97,13 @@ fun ConqueredSignsScreen(navController: NavController, conqueredSigns: List<Sign
             contentDescription = "Rolar para baixo",
             modifier = Modifier.padding(vertical = 8.dp)
         )
-
-        AppBottomNavigationBar(navController = navController)
     }
 }
 
 @Composable
-fun SignItem(signName: String, isConquered: Boolean) {
-    val backgroundColor = if (isConquered) HighlightYellow else MaterialTheme.colorScheme.background
-    val border = if (isConquered) null else BorderStroke(1.dp, Color.Gray)
+fun SignItem(signName: String, isknown: Boolean) {
+    val backgroundColor = if (isknown) HighlightYellow else MaterialTheme.colorScheme.background
+    val border = if (isknown) null else BorderStroke(1.dp, Color.Gray)
 
     Card(
         modifier = Modifier
@@ -121,7 +117,7 @@ fun SignItem(signName: String, isConquered: Boolean) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            if (isConquered) {
+            if (isknown) {
                 Text(
                     text = signName,
                     fontSize = 22.sp,
@@ -141,12 +137,3 @@ fun SignItem(signName: String, isConquered: Boolean) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ConqueredSignsScreenPreview() {
-    val navController = rememberNavController()
-    val mockConqueredSigns = listOf(
-        Sign("Bom dia")
-    )
-    ConqueredSignsScreen(navController = navController, conqueredSigns = mockConqueredSigns)
-}

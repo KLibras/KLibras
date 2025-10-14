@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "179236694177",
+    "project_id": "klibras",
+    "storage_bucket": "klibras.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:179236694177:android:0454be23f6175e076ae8e0",
+        "android_client_info": {
+          "package_name": "com.br.klibras"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "179236694177-f1up9ce2ujp2ei1b6t0oe1ipp6fbv0t9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.br.klibras",
+            "certificate_hash": "ca96df535a50b9ce7bd7deeef3a052ac1a9931ad"
+          }
+        },
+        {
+          "client_id": "179236694177-b7m63pf34e86ma85o0mdh62if8r5s5uh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMbMRGeyu6rsYfS8mE1lx_bFb-l3TBlKE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "179236694177-b7m63pf34e86ma85o0mdh62if8r5s5uh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,7 @@
 package com.br.klibras.shared
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -8,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,8 +57,8 @@ fun AppBottomNavigationBar(navController: NavController) {
             items.forEach { screen ->
                 BottomNavItem(
                     screen = screen,
-                    // O item é considerado "selecionado" se sua rota corresponde à rota atual na hierarquia de navegação.
-                    selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                    // O item é considerado "selecionado" se sua rota corresponde à rota atual.
+                    selected = currentDestination?.route == screen.route,
                     onClick = {
                         // Navega para a rota da tela clicada.
                         if (screen.route != currentDestination?.route) {
@@ -88,11 +90,16 @@ private fun RowScope.BottomNavItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     // Column organiza o ícone e o texto verticalmente.
     Column(
         modifier = Modifier
             .weight(1f) // Faz com que cada item ocupe o mesmo espaço horizontal.
-            .clickable(onClick = onClick) // Torna a área do item clicável.
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null, // <-- ALTERAÇÃO: Remove o efeito de ripple (overlay)
+                onClick = onClick
+            ) // Torna a área do item clicável.
             .padding(vertical = 8.dp), // Espaçamento vertical interno.
         horizontalAlignment = Alignment.CenterHorizontally, // Centraliza o ícone e o texto horizontalmente.
         verticalArrangement = Arrangement.Center // Centraliza o conteúdo verticalmente.
