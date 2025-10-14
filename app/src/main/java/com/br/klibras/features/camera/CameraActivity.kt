@@ -47,9 +47,7 @@ import com.br.klibras.R
 import com.br.klibras.core.ui.theme.Green100
 import com.br.klibras.core.ui.theme.Grey70
 import com.br.klibras.core.ui.theme.HighlightYellow
-import com.br.klibras.core.ui.theme.JosefinSans
 import com.br.klibras.core.ui.theme.Red100
-import com.br.klibras.core.ui.theme.Roboto
 
 
 enum class ScreenState {
@@ -90,8 +88,7 @@ fun RecordButton(
         Text(
             text = "Gravar",
             fontSize = 20.sp,
-            color = Color.Black,
-            fontFamily = Roboto
+            color = Color.Black
         )
     }
 }
@@ -130,8 +127,7 @@ fun CameraLayout(
                 contentAlignment = Alignment.Center
             ) {
                 Text("Tela da Câmera",
-                    fontSize = 24.sp,
-                    fontFamily = Roboto)
+                    fontSize = 24.sp)
             }
         },
         bottomBar = {
@@ -171,14 +167,12 @@ fun ResultRight(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
             Text(
                 text = "Parabéns",
                 fontSize = 40.sp,
-                color = Color.Black,
-                fontFamily = JosefinSans
+                color = Color.Black
             )
             Text(
                 text = "+ 5 pontos",
                 fontSize = 20.sp,
-                color = Color.Black,
-                fontFamily = Roboto
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(50.dp))
             Box(
@@ -201,8 +195,7 @@ fun ResultRight(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
             Text(
                 text = "Sinal realizado corretamente",
                 fontSize = 22.sp,
-                color = Color.Black,
-                fontFamily = Roboto
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(80.dp))
             Column(
@@ -233,8 +226,7 @@ fun ResultRight(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
                 Text(
                     text = "Próximo sinal",
                     fontSize = 14.sp,
-                    color = Color.Black,
-                    fontFamily = Roboto
+                    color = Color.Black
 
                 )
             }
@@ -266,8 +258,7 @@ fun ResultWrong(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
             Text(
                 text = "Incorreto",
                 fontSize = 40.sp,
-                color = Color.Black,
-                fontFamily = JosefinSans
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(24.dp))
             Box(
@@ -290,8 +281,7 @@ fun ResultWrong(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
             Text(
                 text = "Sinal não reconhecido",
                 fontSize = 22.sp,
-                color = Color.Black,
-                fontFamily = Roboto
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(80.dp))
 
@@ -326,8 +316,7 @@ fun ResultWrong(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
                     Text(
                         text = "Tentar novamente",
                         fontSize = 14.sp,
-                        color = Color.Black,
-                        fontFamily = Roboto
+                        color = Color.Black
                     )
                 }
 
@@ -360,8 +349,7 @@ fun ResultWrong(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
                     Text(
                         text = "Próximo sinal",
                         fontSize = 14.sp,
-                        color = Color.Black,
-                        fontFamily = Roboto
+                        color = Color.Black
                     )
                 }
             }

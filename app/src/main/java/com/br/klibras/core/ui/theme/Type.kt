@@ -17,7 +17,6 @@ val provider = GoogleFont.Provider(
 )
 
 val josefinSansFontName = GoogleFont("Josefin Sans")
-val robotoFontName = GoogleFont("Roboto")
 
 
 
@@ -30,22 +29,13 @@ val JosefinSans = FontFamily(
 )
 
 
-// Fonte não principal pra texto longos/ semi-importantes etc
-
-val Roboto = FontFamily(
-    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = robotoFontName, fontProvider = provider, weight = FontWeight.Bold)
-)
-
-
 
 // Tipografia do app
 val Typography = Typography(
     displayLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.Bold, fontSize = 57.sp),
     headlineLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.SemiBold, fontSize = 32.sp),
     titleLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.SemiBold, fontSize = 22.sp),
-    bodyLarge = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Normal, fontSize = 16.sp),
-    bodyMedium = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Normal, fontSize = 14.sp),
-    labelSmall = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 11.sp)
+    bodyLarge = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.Normal, fontSize = 16.sp),
+    bodyMedium = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.Normal, fontSize = 14.sp),
+    labelSmall = TextStyle(fontFamily = JosefinSans, fontWeight = FontWeight.Medium, fontSize = 11.sp)
 )

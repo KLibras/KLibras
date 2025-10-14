@@ -16,7 +16,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.br.klibras.core.ui.theme.JosefinSans
 import com.br.klibras.core.ui.theme.KLibrasTheme
-import com.br.klibras.core.ui.theme.Roboto
 import com.br.klibras.features.main.Screen
 
 @Composable
@@ -96,7 +95,7 @@ fun ProfileSection(
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Alterar senha", fontSize = 14.sp, fontFamily = Roboto)
+                    Text("Alterar senha", fontSize = 14.sp)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
@@ -108,7 +107,7 @@ fun ProfileSection(
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Alterar username", fontSize = 14.sp, fontFamily = Roboto)
+                    Text("Alterar username", fontSize = 14.sp)
                 }
             }
         }
