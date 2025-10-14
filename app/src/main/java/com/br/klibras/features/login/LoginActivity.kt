@@ -191,10 +191,9 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botão de login com Google.
             Button(
                 onClick = {
-                    // --- CHANGED BLOCK START ---
+
                     val getGoogleIdOption = GetGoogleIdOption.Builder()
                         .setServerClientId(serverClientId)
                         .setFilterByAuthorizedAccounts(false)
@@ -203,7 +202,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     val credentialRequest = GetCredentialRequest.Builder()
                         .addCredentialOption(getGoogleIdOption)
                         .build()
-                    // --- CHANGED BLOCK END ---
+
 
                     coroutineScope.launch {
                         try {
@@ -285,12 +284,4 @@ private fun navigateToMain(context: Context) {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
     startActivity(context, intent, null)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    // Para o preview funcionar, você pode precisar de um ViewModel de mock/preview
-    // ou garantir que seu ViewModel padrão tenha um construtor vazio.
-    // LoginScreen()
 }

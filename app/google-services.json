@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "179236694177-46aqam1s4mh24g20qvq32dc5p3fn28h0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.br.klibras",
+            "certificate_hash": "9d49fc51f7e9f4032b9603af82cc92c8586bddab"
+          }
+        },
+        {
           "client_id": "179236694177-f1up9ce2ujp2ei1b6t0oe1ipp6fbv0t9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -22,7 +30,7 @@
           }
         },
         {
-          "client_id": "179236694177-b7m63pf34e86ma85o0mdh62if8r5s5uh.apps.googleusercontent.com",
+          "client_id": "179236694177-48ea7egbntsa83pr0mv8qd4l8va5c4jn.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +43,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "179236694177-b7m63pf34e86ma85o0mdh62if8r5s5uh.apps.googleusercontent.com",
+              "client_id": "179236694177-48ea7egbntsa83pr0mv8qd4l8va5c4jn.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
