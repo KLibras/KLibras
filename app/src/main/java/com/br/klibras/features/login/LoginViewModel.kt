@@ -3,7 +3,7 @@ package com.br.klibras.features.login
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.br.klibras.core.service.api.UserAuthService
+import com.br.klibras.core.service.api.AuthService
 import com.br.klibras.core.utils.RetrofitInstance
 import com.br.klibras.core.utils.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState
 
-    private val api: UserAuthService = RetrofitInstance.getUserAuthApi(application)
+    private val api: AuthService = RetrofitInstance.getUserAuthApi(application)
 
     fun login(username: String, password: String) {
         viewModelScope.launch {

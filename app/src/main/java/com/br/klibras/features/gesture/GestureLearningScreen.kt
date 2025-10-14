@@ -53,6 +53,7 @@ fun GestureLearningScreen(navController: NavController, gestureName: String) {
     // Ele retorna um Triple contendo o título, o ID do vídeo e a descrição
     // com base no 'gestureName' recebido.
     val (title, videoResId, description) = when (gestureName) {
+
         "introducao" -> Triple("Introdução", 0, "O kLibras é seu professor de bolso para a Língua Brasileira de Sinais. Use a câmera do celular e a Inteligência Artificial para identificar sinais. Com ele, você aprende e registra seu progresso no vocabulário de Libras.")
         // Caso padrão para gestos futuros ou não mapeados.
         else -> Triple("Em preparação", 0, "Módulo ainda em preparação")

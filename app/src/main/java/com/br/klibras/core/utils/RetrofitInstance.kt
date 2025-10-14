@@ -2,7 +2,7 @@ package com.br.klibras.core.utils
 
 import android.content.Context
 import com.br.klibras.core.service.api.RecognitionService
-import com.br.klibras.core.service.api.UserAuthService
+import com.br.klibras.core.service.api.AuthService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,13 +21,13 @@ object RetrofitInstance {
             .build()
     }
 
-    fun getUserAuthApi(context: Context): UserAuthService {
+    fun getUserAuthApi(context: Context): AuthService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(getAuthenticatedClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(UserAuthService::class.java)
+            .create(AuthService::class.java)
     }
 
 

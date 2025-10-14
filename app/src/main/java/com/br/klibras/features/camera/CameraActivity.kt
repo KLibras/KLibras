@@ -387,13 +387,3 @@ fun CameraScreen() {
         }
     }
 }
-
-
-@Preview(showBackground = true)
-@Composable
-fun CameraScreenPreview() {
-    ResultWrong(
-        onBackClick = {},
-        onNavigateToResultB = {}
-    )
-}
