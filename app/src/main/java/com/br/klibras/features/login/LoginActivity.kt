@@ -40,6 +40,9 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption // Corre
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
+
+
+
 /**
  * A tela de Login do aplicativo.
  * @param loginViewModel O ViewModel que gerencia o estado e a lógica de login.

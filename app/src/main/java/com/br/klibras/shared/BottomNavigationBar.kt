@@ -23,6 +23,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.br.klibras.features.main.Screen
 
 /**
+ *
+ * {TODO! Adicionar a animação de click pro release }
+ *
+ * **/
+
+
+/**
  * A barra de navegação inferior principal do aplicativo.
  * @param navController O controlador de navegação usado para navegar entre as telas.
  */
