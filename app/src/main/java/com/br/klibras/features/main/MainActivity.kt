@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,84 +43,84 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             KLibrasTheme {
-                MainScreen()
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                val bottomBarScreens = listOf(
+                    Screen.Learning.route,
+                    Screen.Ranking.route,
+                    Screen.Dex.route,
+                    Screen.Account.route
+                )
+
+                Scaffold(
+                    bottomBar = {
+                        if (currentRoute in bottomBarScreens) {
+                            AppBottomNavigationBar(navController = navController)
+                        }
+                    }
+                ) { paddingValues ->
+                    AppNavHost(
+                        navController = navController,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Learning.route,
+        modifier = modifier
+    ) {
+        composable(Screen.Learning.route) { LearningScreen(navController = navController) }
 
-    val bottomBarScreens = listOf(
-        Screen.Learning.route,
-        Screen.Ranking.route,
-        Screen.Dex.route,
-        Screen.Account.route
-    )
-
-    Scaffold(
-        bottomBar = {
-            if (currentRoute in bottomBarScreens) {
-                AppBottomNavigationBar(navController = navController)
-            }
+        composable(Screen.Ranking.route) {
+            val mockUsers = listOf(
+                User("Maria", 150),
+                User("João", 125),
+                User("Ana", 110),
+                User("Você", 95),
+                User("Carlos", 80)
+            )
+            RankingScreen(users = mockUsers)
         }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Learning.route,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(Screen.Learning.route) { LearningScreen(navController = navController) }
+        composable(Screen.Dex.route) {
+            val mockConqueredSigns = listOf(
+                Sign("Bom dia")
+            )
+            DexScreen(knownSigns = mockConqueredSigns)
+        }
 
-            composable(Screen.Ranking.route) {
-                val mockUsers = listOf(
-                    User("Maria", 150),
-                    User("João", 125),
-                    User("Ana", 110),
-                    User("Você", 95),
-                    User("Carlos", 80),
-                    User("Carlos", 80),
-                    User("Carlos", 80),
-                    User("Carlos", 80)
-                )
-                RankingScreen(users = mockUsers)
-            }
-            composable(Screen.Dex.route) {
-                val mockConqueredSigns = listOf(
-                    Sign("Bom dia")
-                )
-                DexScreen(knownSigns = mockConqueredSigns)
-            }
+        composable(Screen.Account.route) {
+            AccountScreen(
+                navController = navController,
+                username = "Username",
+                email = "email@email.com",
+                points = 100,
+                conqueredSigns = 1
+            )
+        }
 
-            composable(Screen.Account.route) {
-                AccountScreen(
-                    navController = navController,
-                    username = "Username",
-                    email = "email@email.com",
-                    points = 100,
-                    conqueredSigns = 1
-                )
-            }
+        composable(Screen.ChangePassword.route) {
+            ChangePasswordScreen(navController = navController)
+        }
 
-            composable(Screen.ChangePassword.route) {
-                ChangePasswordScreen(navController = navController)
-            }
+        composable(Screen.ChangeUsername.route) {
+            ChangeUsernameScreen(navController = navController)
+        }
 
-            composable(Screen.ChangeUsername.route) {
-                ChangeUsernameScreen(navController = navController)
-            }
-
-            composable(
-                route = "${Screen.GestureLearning.route}/{gestureName}",
-                arguments = listOf(navArgument("gestureName") { type = NavType.StringType })
-            ) {
-                val gestureName = it.arguments?.getString("gestureName") ?: ""
-                GestureLearningScreen(navController = navController, gestureName = gestureName)
-            }
+        composable(
+            route = "${Screen.GestureLearning.route}/{moduleName}",
+            arguments = listOf(navArgument("moduleName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val moduleName = backStackEntry.arguments?.getString("moduleName") ?: ""
+            GestureLearningScreen(navController = navController, moduleName = moduleName)
         }
     }
 }

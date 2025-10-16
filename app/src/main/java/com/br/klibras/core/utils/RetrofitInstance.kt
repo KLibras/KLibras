@@ -1,8 +1,9 @@
 package com.br.klibras.core.utils
 
 import android.content.Context
-import com.br.klibras.core.service.api.RecognitionService
 import com.br.klibras.core.service.api.AuthService
+import com.br.klibras.core.service.api.RecognitionService
+import com.br.klibras.core.service.api.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://18.231.60.231:8000/" // Mudar depois pra URL certa
+    private const val BASE_URL = "http://192.168.15.8:8000/" // Mudar depois pra URL certa
 
     private fun getAuthenticatedClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
@@ -30,13 +31,22 @@ object RetrofitInstance {
             .create(AuthService::class.java)
     }
 
+    fun getUserServiceApi(context: Context): UserService {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(getAuthenticatedClient(context))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(UserService::class.java)
+    }
 
     fun getRecognitionApi(context: Context): RecognitionService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(getAuthenticatedClient(context)) // This line ensures the JWT is sent
+            .client(getAuthenticatedClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(RecognitionService::class.java)
     }
 }
+

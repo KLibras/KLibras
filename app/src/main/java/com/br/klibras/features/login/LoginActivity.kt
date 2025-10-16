@@ -2,8 +2,11 @@ package com.br.klibras.features.login
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,28 +23,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.JosefinSans
+import com.br.klibras.core.ui.theme.KLibrasTheme
 import com.br.klibras.features.main.MainActivity
 import com.br.klibras.features.register.RegisterComposeActivity
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption // Corrected import
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
-
-
+class LoginActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        installSplashScreen()
+        setContent {
+            KLibrasTheme(dynamicColor = false) {
+                LoginScreen()
+            }
+        }
+    }
+}
 
 /**
  * A tela de Login do aplicativo.
@@ -53,11 +65,11 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     // Estados para armazenar o email e a senha digitados pelo usuário.
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     // Estados para controlar a exibição de erros nos campos de texto.
-    var isEmailError by remember { mutableStateOf(false) }
+    var isUsernameError by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
 
     // Raio dos cantos para os botões e campos de texto.
@@ -66,7 +78,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     val loginState by loginViewModel.loginUiState.collectAsState()
 
     // O serverClientId deve estar no seu arquivo strings.xml.
-    // Certifique-se de que o valor está correto.
     val serverClientId = stringResource(id = R.string.server_client_id)
     val credentialManager = remember(context) { CredentialManager.create(context) }
 
@@ -74,7 +85,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginUiState.Success -> { // Em caso de sucesso
-                Toast.makeText(context, "Login bem-sucedido!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
                 // Navega para a MainActivity e limpa a pilha de navegação.
                 navigateToMain(context)
             }
@@ -119,17 +130,17 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
 
             // Campo de texto para o email.
             OutlinedTextField(
-                value = email,
+                value = username,
                 onValueChange = {
-                    if (it.length <= 50) email = it
-                    isEmailError = false // Reseta o erro ao digitar.
+                    if (it.length <= 50) username = it
+                    isUsernameError = false // Reseta o erro ao digitar.
                 },
-                label = { Text("Insira seu email") },
+                label = { Text("Insira seu usuário") },
                 leadingIcon = { Icon(painterResource(id = R.drawable.mail_svg), contentDescription = "Email icon") },
                 modifier = Modifier.fillMaxWidth(), // Ocupa toda a largura.
                 shape = RoundedCornerShape(cornerRadius), // Bordas arredondadas.
-                isError = isEmailError, // Mostra o estado de erro.
-                supportingText = { if (isEmailError) Text("Este campo não pode estar em branco", color = Color.Red) },
+                isError = isUsernameError, // Mostra o estado de erro.
+                supportingText = { if (isUsernameError) Text("Este campo não pode estar em branco", color = Color.Red) },
                 singleLine = true // Força o campo a ter uma única linha.
             )
 
@@ -168,7 +179,13 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             // Botão de Login.
             Button(
                 onClick = {
-                    navigateToMain(context)
+                    // Validação básica para não enviar campos vazios.
+                    isUsernameError = username.isBlank()
+                    isPasswordError = password.isBlank()
+                    if (!isUsernameError && !isPasswordError) {
+                        // Ação do botão agora chama o ViewModel
+                        loginViewModel.login(username, password)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -285,3 +302,4 @@ private fun navigateToMain(context: Context) {
     }
     startActivity(context, intent, null)
 }
+
