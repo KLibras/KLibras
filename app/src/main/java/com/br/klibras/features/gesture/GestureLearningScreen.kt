@@ -1,16 +1,21 @@
 package com.br.klibras.features.gesture
 
 import android.content.Context
+import android.content.Intent
 import android.text.Spanned
+import android.text.method.ScrollingMovementMethod
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,7 +30,10 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.br.klibras.core.service.api.Sign
+import com.br.klibras.features.camera.CameraActivity
+import com.br.klibras.features.main.Screen
 
 /**
  * Tela dinâmica para aprendizado de gestos de um módulo buscado via API.
@@ -84,6 +92,7 @@ fun GestureLearningScreen(
             } else if (uiState.module != null) {
                 if (uiState.module!!.signs.isNotEmpty()) {
                     ModuleContent(
+                        navController = navController,
                         signs = uiState.module!!.signs
                     )
                 } else {
@@ -99,13 +108,40 @@ fun GestureLearningScreen(
 }
 
 @Composable
-private fun ModuleContent(signs: List<Sign>) {
+private fun ModuleContent(navController: NavController, signs: List<Sign>) {
     var currentSignIndex by remember { mutableIntStateOf(0) }
     val currentSign = signs[currentSignIndex]
     val context = LocalContext.current
 
+    var showSkipWarningDialog by remember { mutableStateOf(false) }
+
     val videoResId = remember(currentSign.videoUrl) {
         getVideoResId(context, currentSign.videoUrl)
+    }
+
+    if (showSkipWarningDialog) {
+        AlertDialog(
+            onDismissRequest = { showSkipWarningDialog = false },
+            title = { Text("Atenção") },
+            text = { Text("Se você não praticar o sinal não serão adicionados pontos, quer continuar?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        currentSignIndex++
+                        showSkipWarningDialog = false
+                    }
+                ) {
+                    Text("Sim")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showSkipWarningDialog = false }
+                ) {
+                    Text("Não")
+                }
+            }
+        )
     }
 
     Column(
@@ -148,37 +184,53 @@ private fun ModuleContent(signs: List<Sign>) {
 
         if (videoResId != 0) {
             Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = { /* TODO: Navegar para câmera com `currentSign.name` como parâmetro */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32))
-            ) {
-                Icon(Icons.Default.CameraAlt, "Praticar", tint = Color.Black)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Praticar", color = Color.Black)
-            }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(
-                onClick = { currentSignIndex-- },
-                modifier = Modifier.weight(1f),
-                enabled = currentSignIndex > 0
-            ) {
-                Text("Anterior")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(
-                onClick = { currentSignIndex++ },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32)),
-                enabled = currentSignIndex < signs.lastIndex
-            ) {
-                Text("Próximo", color = Color.Black)
+                        // Inicia a CameraComposeActivity
+                        val intent = Intent(context, CameraActivity::class.java)
+                        // Passa o nome do sinal atual como um "extra"
+                        intent.putExtra("SIGN_NAME_EXTRA", currentSign.name)
+                        context.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32))
+                ) {
+                    Icon(Icons.Default.CameraAlt, "Praticar", tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Praticar", color = Color.Black)
+                }
+
+                val isLastSign = currentSignIndex == signs.lastIndex
+
+                Button(
+                    onClick = {
+                        if (isLastSign) {
+                            navController.navigate(Screen.Learning.route) {
+                                popUpTo(navController.graph.findStartDestination().id)
+                                launchSingleTop = true
+                            }
+                        } else {
+                            showSkipWarningDialog = true
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDEBC32))
+                ) {
+                    if (isLastSign) {
+                        Icon(Icons.Default.Check, "Concluir", tint = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Concluir", color = Color.Black)
+                    } else {
+                        Icon(Icons.Default.ArrowRightAlt, "Próximo", tint = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Próximo", color = Color.Black)
+                    }
+                }
             }
         }
     }
@@ -194,6 +246,9 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
         HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val androidTextColor = textColor.toArgb()
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -201,11 +256,14 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                 text = spanned
                 textSize = 16f
                 textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
-                // A cor será herdada do tema, mas pode ser forçada se necessário
+                setTextColor(androidTextColor)
+                movementMethod = ScrollingMovementMethod.getInstance()
             }
         },
         update = {
             it.text = spanned
+            it.setTextColor(androidTextColor)
+            it.movementMethod = ScrollingMovementMethod.getInstance()
         }
     )
 }
@@ -232,7 +290,7 @@ fun VideoPlayer(modifier: Modifier = Modifier, videoResId: Int) {
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
         onDispose {
             exoPlayer.release()
         }
@@ -246,6 +304,9 @@ fun VideoPlayer(modifier: Modifier = Modifier, videoResId: Int) {
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
+        },
+        update = {
+            it.player = exoPlayer
         }
     )
 }

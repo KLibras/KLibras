@@ -30,6 +30,12 @@
         </activity>
 
         <activity
+            android:name=".features.camera.CameraActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KLibras">
+        </activity>
+
+        <activity
             android:name=".features.register.RegisterComposeActivity"
             android:exported="false"
             android:theme="@style/Theme.KLibras">

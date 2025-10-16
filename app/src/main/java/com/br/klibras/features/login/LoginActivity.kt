@@ -85,7 +85,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginUiState.Success -> { // Em caso de sucesso
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+               /* Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()*/
                 // Navega para a MainActivity e limpa a pilha de navegação.
                 navigateToMain(context)
             }
