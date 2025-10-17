@@ -7,22 +7,22 @@ import retrofit2.Response
 import retrofit2.http.*
 
 
-data class JobResponse(
+data class CheckActionResponse(
     val job_id: String,
     val status: String
 )
 
-data class AnalysisResult(
-    val action_found: Boolean,
-    val predicted_action: String,
-    val confidence: String,
-    val is_match: Boolean
-)
-
-data class ResultResponse(
+data class AnalysisResultResponse(
     val status: String,
     val result: AnalysisResult?,
     val error: String?
+)
+
+data class AnalysisResult(
+    val message: String?,
+    val action_found: Boolean?,
+    val confidence: String?,
+    val is_match: Boolean? = action_found
 )
 
 
@@ -147,15 +147,11 @@ interface RecognitionService {
 
 
     **/
-    @Multipart
-    @POST("/check_action")
-    suspend fun uploadForAnalysis(
-        @Part expected_action: MultipartBody.Part,
-        @Part video: MultipartBody.Part
-    ): Response<JobResponse>
+    @POST("check_action")
+    suspend fun checkAction(): Response<CheckActionResponse>
 
-    @GET("/results/{job_id}")
+    @GET("results/{job_id}")
     suspend fun getAnalysisResult(
         @Path("job_id") jobId: String
-    ): Response<ResultResponse>
+    ): Response<AnalysisResultResponse>
 }

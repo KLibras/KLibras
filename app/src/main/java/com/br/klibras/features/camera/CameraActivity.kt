@@ -4,13 +4,20 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.video.FileOutputOptions
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recording
+import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.camera.view.video.AudioConfig
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -62,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import com.br.klibras.R
 import com.br.klibras.core.ui.theme.Green100
@@ -69,6 +77,9 @@ import com.br.klibras.core.ui.theme.Grey70
 import com.br.klibras.core.ui.theme.HighlightYellow
 import com.br.klibras.core.ui.theme.KLibrasTheme
 import com.br.klibras.core.ui.theme.Red100
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class CameraActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,59 +101,21 @@ enum class ScreenState {
     ResultB
 }
 
-@Composable
-fun RecordButton(onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
-            .padding(16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 75.dp, height = 55.dp)
-                .background(
-                    color = HighlightYellow,
-                    shape = RoundedCornerShape(10.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.camera_logo),
-                contentDescription = "Gravar",
-                modifier = Modifier.size(35.dp),
-                tint = Grey70
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Gravar",
-            fontSize = 20.sp,
-            color = Color.Black
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraLayout(
     signName: String,
     onRecordClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    isRecording: Boolean
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val permissions = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.RECORD_AUDIO
+        Manifest.permission.CAMERA
     )
+
     var hasPermissions by remember {
         mutableStateOf(
             permissions.all {
@@ -150,12 +123,14 @@ fun CameraLayout(
             }
         )
     }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { grantedPermissions ->
             hasPermissions = grantedPermissions.values.all { it }
         }
     )
+
     LaunchedEffect(key1 = Unit) {
         if (!hasPermissions) {
             launcher.launch(permissions)
@@ -223,21 +198,21 @@ fun CameraLayout(
                         modifier = Modifier
                             .size(width = 75.dp, height = 55.dp)
                             .background(
-                                color = HighlightYellow,
+                                color = if (isRecording) Red100 else HighlightYellow,
                                 shape = RoundedCornerShape(10.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.camera_logo),
-                            contentDescription = "Gravar",
+                            contentDescription = if (isRecording) "Parar" else "Gravar",
                             modifier = Modifier.size(35.dp),
-                            tint = Grey70
+                            tint = if (isRecording) Color.White else Grey70
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Gravar",
+                        text = if (isRecording) "Parar" else "Gravar",
                         fontSize = 20.sp,
                         color = Color.White
                     )
@@ -251,6 +226,11 @@ fun CameraLayout(
 fun CameraPreview(lifecycleOwner: LifecycleOwner) {
     val context = LocalContext.current
     val cameraController = remember { LifecycleCameraController(context) }
+
+    LaunchedEffect(cameraController) {
+        // Set quality to SD
+        cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
+    }
 
     AndroidView(
         factory = { ctx ->
@@ -275,7 +255,7 @@ fun PermissionDeniedScreen(onRequestPermission: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Permissão da câmera e áudio necessária",
+            text = "Permissão da câmera necessária",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -283,7 +263,7 @@ fun PermissionDeniedScreen(onRequestPermission: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Este recurso precisa de acesso à sua câmera e microfone para gravar o sinal. Por favor, conceda a permissão.",
+            text = "Este recurso precisa de acesso à sua câmera para gravar o sinal. Por favor, conceda a permissão.",
             textAlign = TextAlign.Center,
             color = Color.White
         )
@@ -522,24 +502,89 @@ fun ResultWrong(onBackClick: () -> Unit, onNavigateToResultB: () -> Unit) {
 @Composable
 fun CameraScreen(signName: String) {
     var currentScreen by remember { mutableStateOf(ScreenState.Camera) }
+    var isRecording by remember { mutableStateOf(false) }
+    var currentRecording by remember { mutableStateOf<Recording?>(null) }
+    var recordedVideoPath by remember { mutableStateOf<String?>(null) }
+
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraController = remember { LifecycleCameraController(context) }
+
+    LaunchedEffect(cameraController) {
+        cameraController.bindToLifecycle(lifecycleOwner)
+        cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+        cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
+    }
 
     when (currentScreen) {
         ScreenState.Camera -> {
             CameraLayout(
                 signName = signName,
+                isRecording = isRecording,
                 onRecordClick = {
-                    val isCorrect = listOf(true, false).random()
-                    currentScreen = if (isCorrect) ScreenState.ResultA else ScreenState.ResultB
+                    if (!isRecording) {
+                        // Start recording
+                        val name = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
+                            .format(System.currentTimeMillis())
+
+                        // Create file in app's external files directory (no permission needed)
+                        val videoFile = File(
+                            context.getExternalFilesDir(null),
+                            "KLibras_$name.mp4"
+                        )
+
+                        val outputOptions = FileOutputOptions.Builder(videoFile).build()
+
+                        // Disable audio
+                        val audioConfig = AudioConfig.AUDIO_DISABLED
+
+                        currentRecording = cameraController.startRecording(
+                            outputOptions,
+                            audioConfig,
+                            ContextCompat.getMainExecutor(context),
+                            object : Consumer<VideoRecordEvent> {
+                                override fun accept(event: VideoRecordEvent) {
+                                    when (event) {
+                                        is VideoRecordEvent.Start -> {
+                                            isRecording = true
+                                            Log.d("CameraX", "Recording started")
+                                        }
+                                        is VideoRecordEvent.Finalize -> {
+                                            isRecording = false
+                                            if (!event.hasError()) {
+                                                recordedVideoPath = videoFile.absolutePath
+                                                Log.d("CameraX", "Recording saved: $recordedVideoPath")
+
+                                                // For now, randomly show success or failure
+                                                // You can replace this with actual ML model inference
+                                                val isCorrect = listOf(true, false).random()
+                                                currentScreen = if (isCorrect) ScreenState.ResultA else ScreenState.ResultB
+                                            } else {
+                                                Log.e("CameraX", "Recording error: ${event.cause?.message}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    } else {
+                        // Stop recording
+                        currentRecording?.stop()
+                        currentRecording = null
+                    }
                 },
                 onBackClick = {
+                    currentRecording?.stop()
                     (context as? Activity)?.finish()
                 }
             )
         }
         ScreenState.ResultA -> {
             ResultRight(
-                onBackClick = { currentScreen = ScreenState.Camera },
+                onBackClick = {
+                    currentScreen = ScreenState.Camera
+                    recordedVideoPath = null
+                },
                 onNavigateToResultB = {
                     (context as? Activity)?.finish()
                 }
@@ -547,7 +592,10 @@ fun CameraScreen(signName: String) {
         }
         ScreenState.ResultB -> {
             ResultWrong(
-                onBackClick = { currentScreen = ScreenState.Camera },
+                onBackClick = {
+                    currentScreen = ScreenState.Camera
+                    recordedVideoPath = null
+                },
                 onNavigateToResultB = {
                     (context as? Activity)?.finish()
                 }
