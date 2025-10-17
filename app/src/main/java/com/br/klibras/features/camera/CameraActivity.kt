@@ -107,10 +107,11 @@ fun CameraLayout(
     signName: String,
     onRecordClick: () -> Unit,
     onBackClick: () -> Unit,
-    isRecording: Boolean
+    isRecording: Boolean,
+    cameraController: LifecycleCameraController,
+    lifecycleOwner: LifecycleOwner
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     val permissions = arrayOf(
         Manifest.permission.CAMERA
@@ -134,6 +135,19 @@ fun CameraLayout(
     LaunchedEffect(key1 = Unit) {
         if (!hasPermissions) {
             launcher.launch(permissions)
+        }
+    }
+
+    // Bind and configure the shared controller only when permission is granted
+    LaunchedEffect(hasPermissions, cameraController) {
+        if (hasPermissions) {
+            cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
+            cameraController.bindToLifecycle(lifecycleOwner)
+        } else {
+            try {
+                cameraController.unbind()
+            } catch (_: Exception) { /* ignore */ }
         }
     }
 
@@ -167,7 +181,7 @@ fun CameraLayout(
                 contentAlignment = Alignment.Center
             ) {
                 if (hasPermissions) {
-                    CameraPreview(lifecycleOwner = lifecycleOwner)
+                    CameraPreview(lifecycleOwner = lifecycleOwner, cameraController = cameraController)
                 } else {
                     PermissionDeniedScreen {
                         launcher.launch(permissions)
@@ -223,21 +237,15 @@ fun CameraLayout(
 }
 
 @Composable
-fun CameraPreview(lifecycleOwner: LifecycleOwner) {
-    val context = LocalContext.current
-    val cameraController = remember { LifecycleCameraController(context) }
-
-    LaunchedEffect(cameraController) {
-        // Set quality to SD
-        cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
-    }
+fun CameraPreview(lifecycleOwner: LifecycleOwner, cameraController: LifecycleCameraController) {
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     AndroidView(
         factory = { ctx ->
             PreviewView(ctx).apply {
+                // Use the shared controller passed from parent
                 this.controller = cameraController
-                cameraController.bindToLifecycle(lifecycleOwner)
-                cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                // Do NOT bind here; binding is done in CameraLayout when permissions are granted
             }
         },
         modifier = Modifier.fillMaxSize()
@@ -508,19 +516,19 @@ fun CameraScreen(signName: String) {
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Create a single shared LifecycleCameraController and reuse it for preview + recording
     val cameraController = remember { LifecycleCameraController(context) }
 
-    LaunchedEffect(cameraController) {
-        cameraController.bindToLifecycle(lifecycleOwner)
-        cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-        cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
-    }
+    // Do NOT bind here — binding is handled in CameraLayout after permissions are granted
 
     when (currentScreen) {
         ScreenState.Camera -> {
             CameraLayout(
                 signName = signName,
                 isRecording = isRecording,
+                cameraController = cameraController,
+                lifecycleOwner = lifecycleOwner,
                 onRecordClick = {
                     if (!isRecording) {
                         // Start recording
@@ -556,7 +564,6 @@ fun CameraScreen(signName: String) {
                                                 Log.d("CameraX", "Recording saved: $recordedVideoPath")
 
                                                 // For now, randomly show success or failure
-                                                // You can replace this with actual ML model inference
                                                 val isCorrect = listOf(true, false).random()
                                                 currentScreen = if (isCorrect) ScreenState.ResultA else ScreenState.ResultB
                                             } else {
