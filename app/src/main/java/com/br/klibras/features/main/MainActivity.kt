@@ -21,7 +21,6 @@ import com.br.klibras.features.account.AccountScreen
 import com.br.klibras.features.account.ChangePasswordScreen
 import com.br.klibras.features.account.ChangeUsernameScreen
 import com.br.klibras.features.dex.DexScreen
-import com.br.klibras.features.dex.Sign
 import com.br.klibras.features.gesture.GestureLearningScreen
 import com.br.klibras.features.learn.LearningScreen
 import com.br.klibras.features.ranking.RankingScreen
@@ -91,10 +90,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             RankingScreen(users = mockUsers)
         }
         composable(Screen.Dex.route) {
-            val mockConqueredSigns = listOf(
-                Sign("Bom dia")
-            )
-            DexScreen(knownSigns = mockConqueredSigns)
+            DexScreen()
         }
 
         composable(Screen.Account.route) {
