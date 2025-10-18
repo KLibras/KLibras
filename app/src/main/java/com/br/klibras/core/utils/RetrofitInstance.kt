@@ -11,13 +11,22 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://192.168.15.8:8000/" // Mudar depois pra URL certa
+    private const val BASE_URL = "http://192.168.15.8:8000/"
 
     private fun getAuthenticatedClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(context.applicationContext))
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    private fun getVideoProcessingClient(context: Context): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(context.applicationContext))
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
@@ -43,10 +52,9 @@ object RetrofitInstance {
     fun getVideoProcessingService(context: Context): RecognitionService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(getAuthenticatedClient(context))
+            .client(getVideoProcessingClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(RecognitionService::class.java)
     }
 }
-
