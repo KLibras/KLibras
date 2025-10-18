@@ -18,30 +18,37 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
+import com.br.klibras.core.service.api.Sign
 import com.br.klibras.core.ui.theme.JosefinSans
-
 
 val HighlightYellow = Color(0xFFDEBC32)
 
-data class Sign(val name: String)
-
 @Composable
-fun DexScreen(knownSigns: List<Sign>) {
-    val allPossibleSigns = listOf("Bom dia", "Boa tarde", "Boa noite", "Obrigado")
-    val knownSignNames = knownSigns.map { it.name }.toSet()
+fun DexScreen(viewModel: DexViewModel = viewModel()) {
+    val context = LocalContext.current
+    val dexState by viewModel.dexState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadKnownSigns(context)
+    }
 
     Column(
         modifier = Modifier
@@ -79,31 +86,59 @@ fun DexScreen(knownSigns: List<Sign>) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            allPossibleSigns.forEach { signName ->
-                SignItem(
-                    signName = signName,
-                    isknown = signName in knownSignNames
-                )
+        when (val state = dexState) {
+            is DexState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = HighlightYellow)
+                }
+            }
+            is DexState.Success -> {
+                DexSignsList(knownSigns = state.knownSigns)
+            }
+            is DexState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.message,
+                        color = Color.Red,
+                        fontFamily = JosefinSans
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowDown,
-            contentDescription = "Rolar para baixo",
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
     }
 }
 
 @Composable
-fun SignItem(signName: String, isknown: Boolean) {
-    val backgroundColor = if (isknown) HighlightYellow else MaterialTheme.colorScheme.background
-    val border = if (isknown) null else BorderStroke(1.dp, Color.Gray)
+fun DexSignsList(knownSigns: List<Sign>) {
+    val maxSlots = 4
+    val knownSignNames = knownSigns.map { it.name }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        for (i in 0 until maxSlots) {
+            if (i < knownSignNames.size) {
+                SignItem(
+                    signName = knownSignNames[i],
+                    isKnown = true
+                )
+            } else {
+                EmptySignSlot()
+            }
+        }
+    }
+}
+
+@Composable
+fun SignItem(signName: String, isKnown: Boolean) {
+    val backgroundColor = if (isKnown) HighlightYellow else MaterialTheme.colorScheme.background
+    val border = if (isKnown) null else BorderStroke(1.dp, Color.Gray)
 
     Card(
         modifier = Modifier
@@ -117,23 +152,37 @@ fun SignItem(signName: String, isknown: Boolean) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            if (isknown) {
-                Text(
-                    text = signName,
-                    fontSize = 22.sp,
-                    color = Color.Black,
-                    fontFamily = JosefinSans,
-                    fontWeight = FontWeight.Bold
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Sinal bloqueado",
-                    modifier = Modifier.size(40.dp),
-                    alpha = 0.5f
-                )
-            }
+            Text(
+                text = signName,
+                fontSize = 22.sp,
+                color = Color.Black,
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
+@Composable
+fun EmptySignSlot() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        border = BorderStroke(1.dp, Color.Gray)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Slot vazio",
+                modifier = Modifier.size(40.dp),
+                alpha = 0.5f
+            )
+        }
+    }
+}
