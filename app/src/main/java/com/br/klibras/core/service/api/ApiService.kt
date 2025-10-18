@@ -1,29 +1,29 @@
 package com.br.klibras.core.service.api
 
 import com.google.gson.annotations.SerializedName
+import retrofit2.Call
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
 
 
-data class CheckActionResponse(
-    val job_id: String,
+data class UploadResponse(
+    val jobId: String,
     val status: String
 )
 
-data class AnalysisResultResponse(
+data class ResultResponse(
+    val jobId: String,
     val status: String,
-    val result: AnalysisResult?,
-    val error: String?
+    val actionFound: Boolean,
+    val predictedAction: String,
+    val confidence: String,
+    val expectedAction: String,
+    val isMatch: Boolean
 )
 
-data class AnalysisResult(
-    val message: String?,
-    val action_found: Boolean?,
-    val confidence: String?,
-    val is_match: Boolean? = action_found
-)
+
 
 
 // Resposta do login, tem que pegar essas infos e salvar no TokenManager
@@ -147,11 +147,13 @@ interface RecognitionService {
 
 
     **/
-    @POST("check_action")
-    suspend fun checkAction(): Response<CheckActionResponse>
+    @Multipart
+    @POST("/check_action")
+    fun uploadVideo(
+        @Part("expected_action") expectedAction: String,
+        @Part video: MultipartBody.Part
+    ): Call<UploadResponse>
 
-    @GET("results/{job_id}")
-    suspend fun getAnalysisResult(
-        @Path("job_id") jobId: String
-    ): Response<AnalysisResultResponse>
+    @GET("/results/{job_id}")
+    fun getResult(@Path("job_id") jobId: String): Call<ResultResponse>
 }

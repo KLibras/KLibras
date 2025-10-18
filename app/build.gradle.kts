@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation("androidx.camera:camera-video:1.4.1")
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -99,10 +100,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material.icons.extended)
 
-
-    // Dependencias pra fazer login do google
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)

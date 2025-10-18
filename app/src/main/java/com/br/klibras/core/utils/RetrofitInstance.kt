@@ -40,7 +40,7 @@ object RetrofitInstance {
             .create(UserService::class.java)
     }
 
-    fun getRecognitionApi(context: Context): RecognitionService {
+    fun getVideoProcessingService(context: Context): RecognitionService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(getAuthenticatedClient(context))
