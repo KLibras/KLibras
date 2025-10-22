@@ -14,14 +14,10 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 
 private const val TAG = "LoginViewModel"
-
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
-
     private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState
-
     private val api: AuthService = RetrofitInstance.getUserAuthApi(application)
-
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _loginUiState.value = LoginUiState.Loading
@@ -29,19 +25,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 // Monta o corpo da requisição para o login
                 val userRequestBody = username.toRequestBody("text/plain".toMediaTypeOrNull())
                 val passRequestBody = password.toRequestBody("text/plain".toMediaTypeOrNull())
-
                 // Faz a chamada para a API
                 val response = api.login(userRequestBody, passRequestBody)
-
                 if (response.isSuccessful && response.body() != null) {
                     val accessToken = response.body()!!.accessToken
                     val refreshToken = response.body()!!.refreshToken
-
                     // Salva os tokens usando o TokenManager
                     TokenManager.saveTokens(getApplication(), accessToken, refreshToken)
-
                     _loginUiState.value = LoginUiState.Success("Login bem-sucedido!")
-
                 } else {
                     // Loga o erro da API antes de notificar a UI
                     val errorMsg = "Login falhou: ${response.code()} - ${response.message()}"

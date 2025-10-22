@@ -75,7 +75,6 @@ fun AppBottomNavigationBar(navController: NavController) {
                                     saveState = true
                                 }
                                 launchSingleTop = true // Garante uma única instância da tela.
-                                restoreState = true // Restaura o estado ao voltar para a tela.
                             }
                         }
                     }
