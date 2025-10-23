@@ -370,13 +370,6 @@ File > Invalidate Caches / Restart
 - Teste em dispositivo físico (emulador pode ter limitações)
 - Verifique logs: `adb logcat | grep CameraX`
 
-### Modelos não carregam
-
-- Confirme que os arquivos `.tflite` e `.task` estão em `assets/`
-- Verifique o tamanho dos arquivos (não podem estar corrompidos)
-- Rebuild do projeto: `Build > Rebuild Project`
-
----
 
 ## Licença
 
