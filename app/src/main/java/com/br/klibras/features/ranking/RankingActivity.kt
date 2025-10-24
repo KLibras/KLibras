@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,26 +59,20 @@ fun RankingScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Ranking - Top 10",
+                text = "Ranking ",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = { rankingViewModel.refresh() }) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Atualizar ranking",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-            }
+
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -105,9 +98,6 @@ fun RankingScreen(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { rankingViewModel.refresh() }) {
-                            Text("Tentar novamente")
-                        }
                     }
                 }
             }

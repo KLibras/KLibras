@@ -34,7 +34,6 @@ class RankingViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             try {
-                // Fetch both leaderboard and current user in parallel
                 val leaderboardResponse = userService.getLeaderboard()
                 val currentUserResponse = userService.getCurrentUser()
 
@@ -42,10 +41,10 @@ class RankingViewModel(application: Application) : AndroidViewModel(application)
                     val allUsers = leaderboardResponse.body() ?: emptyList()
                     val currentUser = currentUserResponse.body()
 
-                    // Take only top 10 users
+
                     val topUsers = allUsers.take(10)
 
-                    // Find current user's rank in the full leaderboard
+
                     val currentUserRank = allUsers.indexOfFirst { it.id == currentUser?.id }.let {
                         if (it >= 0) it + 1 else null
                     }
@@ -78,7 +77,4 @@ class RankingViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun refresh() {
-        loadLeaderboard()
-    }
 }
