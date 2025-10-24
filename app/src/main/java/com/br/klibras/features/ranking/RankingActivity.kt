@@ -3,46 +3,39 @@ package com.br.klibras.features.ranking
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
+import com.br.klibras.core.service.api.User
 import com.br.klibras.core.ui.theme.Copper
 import com.br.klibras.core.ui.theme.HighlightYellow
 import com.br.klibras.core.ui.theme.Khaki
 
-
-data class User(val username: String, val points: Int)
-
 @Composable
-fun RankingScreen(users: List<User>) {
+fun RankingScreen(
+    rankingViewModel: RankingViewModel = viewModel()
+) {
+    val uiState by rankingViewModel.uiState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,35 +62,94 @@ fun RankingScreen(users: List<User>) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Ranking",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            itemsIndexed(users) { index, user ->
-                RankingItem(rank = index + 1, user = user)
+            Text(
+                text = "Ranking - Top 10",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = { rankingViewModel.refresh() }) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Atualizar ranking",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
             }
         }
 
-        Icon(
-            imageVector = Icons.Default.ArrowDownward,
-            contentDescription = "Rolar para baixo",
-            modifier = Modifier.padding(vertical = 25.dp)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
+        when {
+            uiState.isLoading && uiState.users.isEmpty() -> {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            uiState.error != null -> {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = uiState.error!!,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { rankingViewModel.refresh() }) {
+                            Text("Tentar novamente")
+                        }
+                    }
+                }
+            }
+            uiState.users.isEmpty() -> {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Nenhum usuário no ranking ainda",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(uiState.users) { index, user ->
+                        val rank = index + 1
+                        RankingItem(
+                            rank = rank,
+                            user = user,
+                            isCurrentUser = rank == uiState.currentUserRank
+                        )
+                    }
+                }
+
+                Icon(
+                    imageVector = Icons.Default.ArrowDownward,
+                    contentDescription = "Rolar para baixo",
+                    modifier = Modifier.padding(vertical = 25.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun RankingItem(rank: Int, user: User) {
+fun RankingItem(rank: Int, user: User, isCurrentUser: Boolean = false) {
     val backgroundColor = when (rank) {
         1 -> HighlightYellow
         2 -> Copper
@@ -105,10 +157,10 @@ fun RankingItem(rank: Int, user: User) {
         else -> MaterialTheme.colorScheme.background
     }
 
-    val border = if (rank > 3) {
-        BorderStroke(1.dp, Color.Gray)
-    } else {
-        null
+    val border = when {
+        isCurrentUser -> BorderStroke(2.dp, Color(0xFFDEBC32))
+        rank > 3 -> BorderStroke(1.dp, Color.Gray)
+        else -> null
     }
 
     Card(
@@ -124,35 +176,32 @@ fun RankingItem(rank: Int, user: User) {
             Text(
                 text = "$rank",
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                color = if (isCurrentUser) Color(0xFFDEBC32) else Color.Unspecified
             )
             Spacer(modifier = Modifier.width(24.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = user.username,
+                    fontSize = 18.sp,
+                    fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isCurrentUser) Color(0xFFDEBC32) else Color.Unspecified
+                )
+                if (isCurrentUser) {
+                    Text(
+                        text = "Você",
+                        fontSize = 12.sp,
+                        color = Color(0xFFDEBC32),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
             Text(
-                text = user.username,
-                fontSize = 18.sp,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = user.points.toString(),
+                text = "${user.points} pts",
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                color = if (isCurrentUser) Color(0xFFDEBC32) else Color.Unspecified
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RankingScreenPreview() {
-
-
-    val mockUsers = listOf(
-        User("Username", 100),
-        User("Username", 99),
-        User("Username", 98),
-        User("Username", 95),
-        User("Username", 95)
-    )
-
-    RankingScreen(users = mockUsers)
 }

@@ -27,7 +27,6 @@ import com.br.klibras.features.dex.DexScreen
 import com.br.klibras.features.gesture.GestureLearningScreen
 import com.br.klibras.features.learn.LearningScreen
 import com.br.klibras.features.ranking.RankingScreen
-import com.br.klibras.features.ranking.User
 import com.br.klibras.shared.AppBottomNavigationBar
 
 sealed class Screen(val route: String, val icon: Int? = null, val label: String? = null) {
@@ -88,23 +87,14 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         composable(Screen.Learning.route) { LearningScreen(navController = navController) }
 
         composable(Screen.Ranking.route) {
-            val mockUsers = listOf(
-                User("Maria", 150),
-                User("João", 125),
-                User("Ana", 110),
-                User("Você", 95),
-                User("Carlos", 80)
-            )
-            RankingScreen(users = mockUsers)
+            RankingScreen()
         }
         composable(Screen.Dex.route) {
             DexScreen()
         }
-
         composable(Screen.Account.route) {
             AccountScreen(navController = navController)
         }
-
         composable(Screen.ChangePassword.route) {
             ChangePasswordScreen(navController = navController)
         }
