@@ -1,29 +1,41 @@
 package com.br.klibras.features.account
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.br.klibras.shared.CustomInput
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeUsernameScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: ChangeUsernameViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val state by viewModel.state.collectAsState()
+
+    // Handle state changes
+    LaunchedEffect(state) {
+        when (val currentState = state) {
+            is ChangeUsernameState.Success -> {
+                Toast.makeText(context, currentState.message, Toast.LENGTH_SHORT).show()
+                viewModel.resetState()
+                navController.popBackStack()
+            }
+            is ChangeUsernameState.Error -> {
+                Toast.makeText(context, currentState.message, Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> {  }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -40,26 +52,31 @@ fun ChangeUsernameScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center // <-- ESTA LINHA CENTRALIZA O CONTEÚDO
+                .padding(paddingValues)
         ) {
-            CustomInput(
-                hint = "Digite o novo username",
-                onSendClick = { newUsername ->
-                    coroutineScope.launch {
-                        Toast.makeText(context, "Salvando novo username...", Toast.LENGTH_SHORT).show()
-
-                        // TODO: Substitua o 'delay' pela sua chamada de API real
-                        delay(2000)
-
-                        Toast.makeText(context, "Username alterado com sucesso!", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack()
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                CustomInput(
+                    hint = "Digite o novo username",
+                    onSendClick = { newUsername ->
+                        viewModel.updateUsername(newUsername)
                     }
+                )
+            }
+
+            if (state is ChangeUsernameState.Loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-            )
+            }
         }
     }
 }

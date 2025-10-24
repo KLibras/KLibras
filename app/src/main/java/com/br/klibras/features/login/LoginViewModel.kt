@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.br.klibras.core.service.api.AuthService
+import com.br.klibras.core.service.api.GoogleTokenRequest
 import com.br.klibras.core.utils.RetrofitInstance
 import com.br.klibras.core.utils.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,32 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 // Loga a exceção completa (incluindo a causa) no Logcat
                 Log.e(TAG, "Falha na conexão ou erro inesperado", e)
                 _loginUiState.value = LoginUiState.Error(e.message ?: "Ocorreu um erro desconhecido")
+            }
+        }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _loginUiState.value = LoginUiState.Loading
+            try {
+                val googleTokenRequest = GoogleTokenRequest(id_token = idToken)
+                val response = api.googleAuth(googleTokenRequest)
+
+                if (response.isSuccessful && response.body() != null) {
+                    val accessToken = response.body()!!.accessToken
+                    val refreshToken = response.body()!!.refreshToken
+
+                    // Salva os tokens usando o TokenManager
+                    TokenManager.saveTokens(getApplication(), accessToken, refreshToken)
+                    _loginUiState.value = LoginUiState.Success("Login com Google bem-sucedido!")
+                } else {
+                    val errorMsg = "Google login falhou: ${response.code()} - ${response.message()}"
+                    Log.e(TAG, errorMsg)
+                    _loginUiState.value = LoginUiState.Error(errorMsg)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Falha no login com Google", e)
+                _loginUiState.value = LoginUiState.Error(e.message ?: "Erro no login com Google")
             }
         }
     }

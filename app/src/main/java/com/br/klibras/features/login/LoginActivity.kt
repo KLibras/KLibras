@@ -210,7 +210,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
 
             Button(
                 onClick = {
-
                     val getGoogleIdOption = GetGoogleIdOption.Builder()
                         .setServerClientId(serverClientId)
                         .setFilterByAuthorizedAccounts(false)
@@ -219,7 +218,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     val credentialRequest = GetCredentialRequest.Builder()
                         .addCredentialOption(getGoogleIdOption)
                         .build()
-
 
                     coroutineScope.launch {
                         try {
@@ -230,14 +228,21 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                                 val idToken = credential.idToken
                                 Log.d("GoogleSignIn", "ID Token recebido: $idToken")
 
-                                // TODO: Envie o idToken para o seu backend para verificação e autenticação.
-                                Toast.makeText(context, "Login com Google bem-sucedido!", Toast.LENGTH_SHORT).show()
-                                navigateToMain(context)
+                                // Send the idToken to your backend
+                                loginViewModel.loginWithGoogle(idToken)
 
                             } else {
                                 Log.e("GoogleSignIn", "A credencial não é do tipo GoogleIdTokenCredential")
                                 Toast.makeText(context, "Erro no login com Google.", Toast.LENGTH_LONG).show()
                             }
+                        } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+                            // User cancelled the dialog - this is normal, just log it
+                            Log.d("GoogleSignIn", "Login com Google cancelado pelo usuário")
+                            // Optional: show a subtle message or do nothing
+                            // Toast.makeText(context, "Login cancelado", Toast.LENGTH_SHORT).show()
+                        } catch (e: androidx.credentials.exceptions.NoCredentialException) {
+                            Log.e("GoogleSignIn", "Nenhuma credencial do Google encontrada")
+                            Toast.makeText(context, "Nenhuma conta Google encontrada no dispositivo.", Toast.LENGTH_LONG).show()
                         } catch (e: GetCredentialException) {
                             Log.e("GoogleSignIn", "Erro ao obter credencial: ${e.message}", e)
                             Toast.makeText(context, "Falha no login com Google.", Toast.LENGTH_LONG).show()
@@ -247,7 +252,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Fundo branco.
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(cornerRadius)
             ) {
                 Image(

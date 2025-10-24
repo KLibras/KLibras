@@ -62,6 +62,10 @@ data class PasswordUpdate(
     val new_password: String
 )
 
+data class GoogleTokenRequest(
+    val id_token: String
+)
+
 interface AuthService {
 
     @POST("register")
@@ -76,6 +80,9 @@ interface AuthService {
 
     @POST("refresh")
     suspend fun refreshToken(@Body refreshToken: RequestBody): Response<LoginResponse>
+
+    @POST("auth/google")
+    suspend fun googleAuth(@Body token: GoogleTokenRequest): Response<LoginResponse>
 }
 
 interface UserService {
