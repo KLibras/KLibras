@@ -3,6 +3,9 @@ package com.br.klibras.features.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -75,7 +78,12 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
     NavHost(
         navController = navController,
         startDestination = Screen.Learning.route,
-        modifier = modifier
+        modifier = modifier,
+        // Aplica a animação de Crossfade a TODAS as transições neste NavHost.
+        enterTransition = { fadeIn(animationSpec = tween(300)) },
+        exitTransition = { fadeOut(animationSpec = tween(300)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+        popExitTransition = { fadeOut(animationSpec = tween(300)) }
     ) {
         composable(Screen.Learning.route) { LearningScreen(navController = navController) }
 
@@ -94,13 +102,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         }
 
         composable(Screen.Account.route) {
-            AccountScreen(
-                navController = navController,
-                username = "Username",
-                email = "email@email.com",
-                points = 100,
-                conqueredSigns = 1
-            )
+            AccountScreen(navController = navController)
         }
 
         composable(Screen.ChangePassword.route) {

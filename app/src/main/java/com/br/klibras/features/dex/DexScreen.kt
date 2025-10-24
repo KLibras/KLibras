@@ -14,12 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.klibras.R
 import com.br.klibras.core.service.api.Sign
 import com.br.klibras.core.ui.theme.JosefinSans
+import kotlinx.coroutines.delay
 
 val HighlightYellow = Color(0xFFDEBC32)
 
@@ -47,6 +45,7 @@ fun DexScreen(viewModel: DexViewModel = viewModel()) {
     val dexState by viewModel.dexState.collectAsState()
 
     LaunchedEffect(Unit) {
+        delay(300)
         viewModel.loadKnownSigns(context)
     }
 
