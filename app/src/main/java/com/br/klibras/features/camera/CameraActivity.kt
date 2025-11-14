@@ -156,7 +156,9 @@ fun CameraLayout(
                 cameraController.setEnabledUseCases(
                     LifecycleCameraController.VIDEO_CAPTURE or LifecycleCameraController.IMAGE_CAPTURE
                 )
-                cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                cameraController.cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                    .build()
                 cameraController.videoCaptureQualitySelector = QualitySelector.from(Quality.SD)
                 cameraController.bindToLifecycle(lifecycleOwner)
                 onCameraReadyChanged(true)

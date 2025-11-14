@@ -114,18 +114,19 @@ interface UserService {
     suspend fun getModuleByName(@Path("name") name: String): Response<Module>
 }
 
+
 interface RecognitionService {
-
     @Multipart
-    @POST("/check_action")
-    fun uploadVideo(
-        @Part("expected_action") expectedAction: String,
+    @POST("check_action")
+    suspend fun uploadVideo(
+        @Part("expected_action") action: RequestBody,
         @Part video: MultipartBody.Part
-    ): Call<UploadResponse>
+    ): Response<UploadResponse>
 
-    @GET("/results/{job_id}")
-    fun getResult(
-        @Path("job_id") jobId: String,
-        @Query("wait") wait: Boolean = false
-    ): Call<ResultResponse>
+    @GET("results/{jobId}")
+    suspend fun getResult(
+        @Path("jobId") jobId: String,
+        @Query("wait") wait: Boolean = false,
+        @Query("timeout") timeout: Int = 10
+    ): Response<ResultResponse>
 }

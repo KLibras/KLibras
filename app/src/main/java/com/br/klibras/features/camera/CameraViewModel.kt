@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.br.klibras.core.utils.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 sealed class ProcessingState {
@@ -38,7 +40,7 @@ class CameraViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val normalizedSignName = signName.lowercase().replace(" ", "_")
+                val normalizedSignName = signName.lowercase().replace(" ", "_").replace("?", "")
 
                 val videoService = RetrofitInstance.getVideoProcessingService(context)
                 val videoPart = MultipartBody.Part.createFormData(
@@ -47,8 +49,10 @@ class CameraViewModel : ViewModel() {
                     videoFile.asRequestBody("video/mp4".toMediaType())
                 )
 
+                val actionBody = normalizedSignName.toRequestBody("text/plain".toMediaType())
+
                 Log.d("VideoUpload", "Uploading video for sign: $normalizedSignName (original: $signName)")
-                val uploadResponse = videoService.uploadVideo(normalizedSignName, videoPart).execute()
+                val uploadResponse = videoService.uploadVideo(actionBody, videoPart)
 
                 if (!uploadResponse.isSuccessful) {
                     _processingState.value = ProcessingState.Error("Upload failed: ${uploadResponse.code()}")
@@ -65,7 +69,7 @@ class CameraViewModel : ViewModel() {
 
                 Log.d("VideoUpload", "Video uploaded with job ID: $jobId")
                 Log.d("VideoUpload", "Waiting 2 seconds before checking result...")
-                Thread.sleep(2000)
+                delay(2000)
 
                 val result = pollJobResult(videoService, jobId)
                 if (result != null) {
@@ -132,11 +136,11 @@ class CameraViewModel : ViewModel() {
         }
     }
 
-    private fun pollJobResult(
+    private suspend fun pollJobResult(
         videoService: com.br.klibras.core.service.api.RecognitionService,
         jobId: String
     ): Boolean? {
-        val maxAttempts = 3
+        val maxAttempts = 30
 
         for (attempt in 1..maxAttempts) {
             try {
@@ -145,14 +149,14 @@ class CameraViewModel : ViewModel() {
                 val resultResponse = videoService.getResult(
                     jobId = jobId,
                     wait = false
-                ).execute()
+                )
 
                 if (!resultResponse.isSuccessful) {
                     Log.e("VideoUpload", "Failed to get result: ${resultResponse.code()}")
                     if (attempt == maxAttempts) {
                         return null
                     }
-                    Thread.sleep(1000)
+                    delay(1000)
                     continue
                 }
 
@@ -171,7 +175,7 @@ class CameraViewModel : ViewModel() {
                     "processing", "pending" -> {
                         Log.d("VideoUpload", "Still processing...")
                         if (attempt < maxAttempts) {
-                            Thread.sleep(1000)
+                            delay(1000)
                         } else {
                             Log.e("VideoUpload", "Timeout after $maxAttempts attempts")
                             return null
@@ -187,7 +191,7 @@ class CameraViewModel : ViewModel() {
                 if (attempt == maxAttempts) {
                     return null
                 }
-                Thread.sleep(1000)
+                delay(1000)
             }
         }
         return null
