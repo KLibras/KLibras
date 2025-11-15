@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://18.229.136.69:8000/"
+    private const val BASE_URL = "http://18.230.116.95:8000/"
 
     private fun getAuthenticatedClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()

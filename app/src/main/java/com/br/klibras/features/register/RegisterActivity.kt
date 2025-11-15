@@ -126,7 +126,7 @@ fun RegisterScreen(registerViewModel: RegisterViewModel = viewModel()) {
                     if (it.length <= 20) username = it
                     isUsernameError = false
                 },
-                label = { Text("Insira seu nome de usuário") },
+                label = { Text("Insira seu nome de email") },
                 leadingIcon = { Icon(painterResource(id = R.drawable.account_svg), contentDescription = "User icon") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(cornerRadius),

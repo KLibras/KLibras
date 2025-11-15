@@ -135,7 +135,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     if (it.length <= 50) username = it
                     isUsernameError = false // Reseta o erro ao digitar.
                 },
-                label = { Text("Insira seu usuário") },
+                label = { Text("Insira seu email") },
                 leadingIcon = { Icon(painterResource(id = R.drawable.mail_svg), contentDescription = "Email icon") },
                 modifier = Modifier.fillMaxWidth(), // Ocupa toda a largura.
                 shape = RoundedCornerShape(cornerRadius), // Bordas arredondadas.
