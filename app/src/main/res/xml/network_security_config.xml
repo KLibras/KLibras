@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
+<<<<<<< Updated upstream
         <domain includeSubdomains="true">18.231.60.231</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
+=======
+        <domain includeSubdomains="true">18.231.174.141</domain>
+>>>>>>> Stashed changes
         <domain includeSubdomains="true">192.168.15.8</domain>
         <domain includeSubdomains="true">192.168.0.68</domain>
     </domain-config>

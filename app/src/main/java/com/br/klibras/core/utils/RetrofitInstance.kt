@@ -11,7 +11,11 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
+<<<<<<< Updated upstream
     private const val BASE_URL = "http://192.168.0.68:8000/"
+=======
+    private const val BASE_URL = "http://18.231.174.141:8000/"
+>>>>>>> Stashed changes
 
     private fun getAuthenticatedClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
